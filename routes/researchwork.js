@@ -153,9 +153,9 @@ router.put('/reject/:id', async (req, res) => {
 
 router.get("/researchtext", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.query.userId;
 
-    const user = await User.findById(userId);
+    const user = await User.findById({ _id: userId });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
