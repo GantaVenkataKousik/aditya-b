@@ -12,8 +12,8 @@ const mongoose = require('mongoose');
 // this is for profile.jsx
 router.get("/", async (req, res) => {
   try {
-    const email = req.user.email;
-    const user = await User.findOne({ email: email });
+    const userId = req.query.userId;
+    const user = await User.findOne({ _id: userId });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
