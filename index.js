@@ -53,7 +53,7 @@ app.use("/research", Research);
 app.use("/signup", signup);
 app.use("/users", users);
 app.use("/workshop", Workshops);
-app.use("/others", others);
+app.use("/", others);
 // Database Connection
 const ConnectDB = async () => {
     try {
@@ -67,10 +67,6 @@ const ConnectDB = async () => {
 
 // Call the database connection function
 ConnectDB();
-
-app.get("/", (req, res) => {
-    res.send("Hello, Welcome to the backend of the Aditya Connect");
-});
 
 // Routes
 app.get("/logout", (req, res) => {

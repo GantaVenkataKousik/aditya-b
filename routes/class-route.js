@@ -64,6 +64,18 @@ router.post('/classes', async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+router.put('/:id', async (req, res) => {
+    try {
+        const classId = req.params.id;
+        const { courseName, semester, numberOfStudents, passCount } = req.body;
+        const updatedClass = await Class.findByIdAndUpdate(classId, { courseName, semester, numberOfStudents, passCount }, { new: true });
+        res.status(200).json(updatedClass);
+    } catch (error) {
+        console.error('Error updating class:', error);
+        res.status(400).json({ error: error.message });
+    }
+});
+
 router.post('/feedback', async (req, res) => {
     try {
         const userId = req.query.userId;
