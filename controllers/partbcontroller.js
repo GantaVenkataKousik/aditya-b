@@ -410,9 +410,7 @@ const deleteResponsibilityByIndex = async (req, res) => {
         if (index < 0 || index >= record.Responsibilities.length) {
             return res.status(400).json({ message: 'Invalid responsibility index' });
         }
-
         record.Responsibilities.splice(index, 1);
-
         await record.save();
 
         res.json({
