@@ -572,13 +572,13 @@ router.get("/pfiled", async (req, res) => {
 
 router.get("/getdata", async (req, res) => {
   try {
-    const UserId = req.user._id;
-    const user = await User.findById(UserId);
+    const UserId = req.query.userId;
+    const user = await User.findById({ _id: UserId });
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
     const responseData = {
-      CouAvgPerMarks: user.couAvgPerMarks,
+      CouAvgPerMarks: user.CouAvgPerMarks,
       CoufeedMarks: user.CoufeedMarks,
       ProctoringMarks: user.ProctoringMarks,
       SciMarks: user.SciMarks,
