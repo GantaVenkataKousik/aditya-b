@@ -29,7 +29,7 @@ const users = require(path.join(__dirname, "routes", "user"));
 const Workshops = require(path.join(__dirname, "routes", "workshops"));
 
 const corsOptions = {
-    origin: '*',
+    origin: ['http://localhost:5173', 'https://aditya-b.onrender.com/', '*'],
     credentials: true,
     exposedHeaders: ['Authorization']
 };
