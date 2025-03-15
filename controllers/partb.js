@@ -37,10 +37,6 @@ const deleteFeedback = async (req, res) => {
     }
 };
 
-
-
-
-
 //Proctoring Controllers
 const updateProctoring = async (req, res) => {
     try {
@@ -423,6 +419,136 @@ const deleteResponsibilityByIndex = async (req, res) => {
     }
 };
 
+// Add Activity
+const addActivity = async (req, res) => {
+    try {
+        const { userId, activityDetails, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Activities.push({ activityDetails, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Activity added successfully', activities: record.Activities });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Add Award
+const addAward = async (req, res) => {
+    try {
+        const { userId, award, issuingOrg, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Awards.push({ Award: award, IssuingOrg: issuingOrg, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Award added successfully', awards: record.Awards });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Add Contribution
+const addContribution = async (req, res) => {
+    try {
+        const { userId, contributionDetails, benefit, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Contribution.push({ contributionDetails, Benefit: benefit, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Contribution added successfully', contributions: record.Contribution });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const addBooks = async (req, res) => {
+    try {
+        const { userId, bookDetails, ISBN, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Books.push({ bookDetails, ISBN, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Books added successfully', books: record.Books });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const addChapters = async (req, res) => {
+    try {
+        const { userId, chapterDetails, publisher, ISBN, authorPosition, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Chapters.push({ chapterDetails, Publisher: publisher, ISBN, authorPosition, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Chapters added successfully', chapters: record.Chapters });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const addPapers = async (req, res) => {
+    try {
+        const { userId, paperDetails, authorPosition, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Papers.push({ paperDetails, authorPosition, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Papers added successfully', papers: record.Papers });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+const addArticle = async (req, res) => {
+    try {
+        const { userId, articleDetails, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Articles.push({ articleDetails, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Article added successfully', articles: record.Articles });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+
+
 
 module.exports = {
     updateFeedback,
@@ -442,5 +568,12 @@ module.exports = {
     updateContributionByIndex,
     deleteContributionByIndex,
     updateAwardByIndex,
-    deleteAwardByIndex
+    deleteAwardByIndex,
+    addActivity,
+    addAward,
+    addContribution,
+    addBooks,
+    addChapters,
+    addPapers,
+    addArticle
 };   

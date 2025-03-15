@@ -10,7 +10,14 @@ const {
     updateAwardByIndex,
     deleteAwardByIndex,
     updateOutreach,
-    deleteOutreach
+    deleteOutreach,
+    addArticle,
+    addActivity,
+    addAward,
+    addBooks,
+    addChapters,
+    addContribution,
+    addPapers
 } = require('../controllers/partb.js');
 const Others = require('../models/othersModel');
 // Activities Routes
@@ -45,4 +52,12 @@ router.get('/others-data', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
+
+router.post('/add-article', addArticle);
+router.post('/add-activity', addActivity);
+router.post('/add-award', addAward);
+router.post('/add-books', addBooks);
+router.post('/add-chapters', addChapters);
+router.post('/add-contribution', addContribution);
+router.post('/add-papers', addPapers);
 module.exports = router;
