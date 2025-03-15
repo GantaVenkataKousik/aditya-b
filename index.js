@@ -29,7 +29,7 @@ const users = require(path.join(__dirname, "routes", "user"));
 const Workshops = require(path.join(__dirname, "routes", "workshops"));
 
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: '*',
     credentials: true,
     exposedHeaders: ['Authorization']
 };
