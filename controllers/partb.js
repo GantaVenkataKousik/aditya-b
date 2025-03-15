@@ -3,7 +3,7 @@ const Proctoring = require('../models/ProctoringModel');
 const Research = require('../models/research');
 const Workshops = require('../models/workshops');
 const User = require('../models/user-model');
-const Others = require('../models/others');
+const Others = require('../models/othersModel');
 
 
 

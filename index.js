@@ -27,7 +27,7 @@ const Research = require(path.join(__dirname, "routes", "researchwork"));
 const signup = require(path.join(__dirname, "routes", "signup"));
 const users = require(path.join(__dirname, "routes", "user"));
 const Workshops = require(path.join(__dirname, "routes", "workshops"));
-const others = require(path.join(__dirname, "routes", "Others"));
+const others = require(path.join(__dirname, "routes", "otherRoute"));
 
 const corsOptions = {
     origin: [
