@@ -29,7 +29,12 @@ const users = require(path.join(__dirname, "routes", "user"));
 const Workshops = require(path.join(__dirname, "routes", "workshops"));
 
 const corsOptions = {
-    origin: ['http://localhost:5173', 'https://aditya-b.onrender.com/', '*'],
+    origin: [
+        'http://localhost:5173',
+        'https://aditya-b.onrender.com/',
+        'https://aditya-f.vercel.app',
+        '*'
+    ],
     credentials: true,
     exposedHeaders: ['Authorization']
 };
