@@ -27,6 +27,7 @@ const Research = require(path.join(__dirname, "routes", "researchwork"));
 const signup = require(path.join(__dirname, "routes", "signup"));
 const users = require(path.join(__dirname, "routes", "user"));
 const Workshops = require(path.join(__dirname, "routes", "workshops"));
+const others = require(path.join(__dirname, "routes", "others"));
 
 const corsOptions = {
     origin: [
@@ -52,7 +53,7 @@ app.use("/research", Research);
 app.use("/signup", signup);
 app.use("/users", users);
 app.use("/workshop", Workshops);
-
+app.use("/others", others);
 // Database Connection
 const ConnectDB = async () => {
     try {
