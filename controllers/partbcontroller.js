@@ -152,8 +152,6 @@ const updateOutreach = async (req, res) => {
     }
 }
 
-
-
 const deleteOutreach = async (req, res) => {
     try {
         const { id } = req.params;
