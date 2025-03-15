@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { updateFeedback, deleteFeedback, updateProctoring, deleteProctoring, updateResearch, deleteResearch, updateWorkshops, deleteWorkshops, updateOutreach, deleteOutreach, updateActivityByIndex, deleteActivityByIndex, updateResponsibilityByIndex, deleteResponsibilityByIndex, updateContributionByIndex, deleteContributionByIndex, updateAwardByIndex, deleteAwardByIndex } = require('../controllers/partbController');
+const { updateFeedback, deleteFeedback, updateProctoring, deleteProctoring, updateResearch, deleteResearch, updateWorkshops, deleteWorkshops, updateOutreach, deleteOutreach, updateActivityByIndex, deleteActivityByIndex, updateResponsibilityByIndex, deleteResponsibilityByIndex, updateContributionByIndex, deleteContributionByIndex, updateAwardByIndex, deleteAwardByIndex } = require('../controllers/partb');
 
 //FEEDBACK Controllers
 router.put('/feedback/:id', updateFeedback);
