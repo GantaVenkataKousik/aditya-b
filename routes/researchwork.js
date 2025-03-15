@@ -30,7 +30,7 @@ router.post("/add", async (req, res) => {
 
 router.get("/data", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.query.userId;
 
     const researchData = await ResearchData.find({ userId: userId });
 
@@ -43,7 +43,7 @@ router.get("/data", async (req, res) => {
 })
 
 router.get("/otherResearch/:id", async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id;
   try {
     const researches = await ResearchData.find({ userId: id });
     if (researches.length === 0) {

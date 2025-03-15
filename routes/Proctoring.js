@@ -5,7 +5,7 @@ const User = require("../models/user-model");
 // Fetch all proctoring data
 router.get("/proctoring-data", async (req, res) => {
     try {
-        const userId = req.user._id;  // Get userId from logged-in user
+        const userId = req.query.userId;  // Get userId from logged-in user
         const data = await Proctoring.find({ teacher: userId });
         const totalPassPercentage = data.reduce((sum, item) => sum + (item.passedStudents / item.eligibleStudents) * 100, 0) / data.length;
         res.json({ data, averagePercentage: totalPassPercentage.toFixed(2) });
@@ -18,7 +18,8 @@ router.get("/proctoring-data", async (req, res) => {
 router.post("/proctoring-data", async (req, res) => {
     try {
         // Fetch the logged-in user
-        const user = await User.findById(req.user._id);
+        const userId = req.query.userId;
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
@@ -74,6 +75,29 @@ router.post("/proctoring-data", async (req, res) => {
     } catch (error) {
         console.error("Error processing proctoring data:", error);
         res.status(500).json({ error: "Failed to process data" });
+    }
+});
+
+router.delete('/proctoring/:id', async (req, res) => {
+    try {
+        const proctoringId = req.params.id;
+        const deletedProctoring = await Proctoring.findByIdAndDelete(proctoringId);
+        res.status(200).json({ message: "Proctoring data deleted successfully" });
+    } catch (error) {
+        console.error('Error deleting proctoring data:', error);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.put('/proctoring/:id', async (req, res) => {
+    try {
+        const proctoringId = req.params.id;
+        const { totalStudents, semesterBranchSec, eligibleStudents, passedStudents } = req.body;
+        const updatedProctoring = await Proctoring.findByIdAndUpdate(proctoringId, { totalStudents, semesterBranchSec, eligibleStudents, passedStudents }, { new: true });
+        res.status(200).json(updatedProctoring);
+    } catch (error) {
+        console.error('Error updating proctoring data:', error);
+        res.status(400).json({ error: error.message });
     }
 });
 

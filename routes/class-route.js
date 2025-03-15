@@ -8,11 +8,11 @@ const mongoose = require('mongoose');
 
 router.post('/classes', async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
+        const userId = req.query.userId;
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-
         const {
             courseName,
             semester,
@@ -66,7 +66,8 @@ router.post('/classes', async (req, res) => {
 });
 router.post('/feedback', async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
+        const userId = req.query.userId;
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
@@ -123,8 +124,32 @@ router.post('/feedback', async (req, res) => {
     }
 });
 
+router.put('/feedback/:id', async (req, res) => {
+    try {
+        const feedbackId = req.params.id;
+        const { courseName, semester, numberOfStudents, feedbackpercent } = req.body;
+        const updatedFeedback = await Feedback.findByIdAndUpdate(feedbackId, { courseName, semester, numberOfStudents, feedbackpercent }, { new: true });
+        res.status(200).json(updatedFeedback);
+    } catch (error) {
+        console.error('Error updating feedback:', error);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.delete('/feedback/:id', async (req, res) => {
+    try {
+        const feedbackId = req.params.id;
+        const deletedFeedback = await Feedback.findByIdAndDelete(feedbackId);
+        res.status(200).json({ message: "Feedback deleted successfully" });
+    } catch (error) {
+        console.error('Error deleting feedback:', error);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+
 router.get("/fdata", async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.query.userId;
 
     try {
         // Fetch Feedback for the logged-in teacher
@@ -138,7 +163,7 @@ router.get("/fdata", async (req, res) => {
 });
 
 router.get("/raw", async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.query.userId;
 
     try {
         // Fetch classes for the logged-in teacher
@@ -153,8 +178,8 @@ router.get("/raw", async (req, res) => {
 
 router.delete("/courses/:id", async (req, res) => {
     try {
-        const { id } = req.params;
-        const deletedCourse = await Class.findByIdAndDelete(id);
+        const courseId = req.params.id;
+        const deletedCourse = await Class.findByIdAndDelete(courseId);
         if (!deletedCourse) {
             return res.status(404).json({ message: "Course not found" });
         }
@@ -168,11 +193,11 @@ router.delete("/courses/:id", async (req, res) => {
 
 router.put('/courses/:id', async (req, res) => {
     try {
-        const { id } = req.params;
+        const courseId = req.params.id;
         const { courseName, semester, numberOfStudents, passCount } = req.body;
-        // Update the course
+        // Update the course    
         const updatedCourse = await Class.findByIdAndUpdate(
-            id,
+            courseId,
             { courseName, semester, numberOfStudents, passCount },
             { new: true, runValidators: true }
         );
@@ -190,9 +215,6 @@ router.put('/courses/:id', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
-
-
-
 
 
 module.exports = router;

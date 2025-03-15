@@ -44,7 +44,7 @@ app.use(cors(corsOptions));
 
 //using routes
 app.use("/addUser", addUser);
-app.use("/articles", Articles);
+app.use("/article", Articles);
 app.use("/classes", classroute);
 app.use("/fetchData", fetchData);
 app.use("/login", login);

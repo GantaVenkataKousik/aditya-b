@@ -5,7 +5,7 @@ const WorkshopData = require('../models/workshops');
 
 router.post("/add", async (req, res) => {
   try {
-    const email = req.user.email;
+    const email = req.body.email;
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -32,12 +32,11 @@ router.post("/add", async (req, res) => {
   }
 });
 
-
 router.get("/data", async (req, res) => {
   try {
-    const UserId = req.user._id;
-    const user = await User.findById(UserId);
-    const Workshops = await WorkshopData.find({ User: UserId });
+    const userId = req.query.userId;
+    const user = await User.findById(userId);
+    const Workshops = await WorkshopData.find({ User: userId });
     const TotalMarks = Workshops.length * 5;
     if (TotalMarks > 0) {
       user.WorkshopMarks = TotalMarks;
@@ -51,5 +50,26 @@ router.get("/data", async (req, res) => {
   }
 })
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const workshopId = req.params.id;
+    const workshop = await WorkshopData.findByIdAndDelete(workshopId);
+    res.status(200).json({ message: "Workshop deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting workshop:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+})
+
+router.put("/:id", async (req, res) => {
+  try {
+    const workshopId = req.params.id;
+    const updatedWorkshop = await WorkshopData.findByIdAndUpdate(workshopId, req.body, { new: true });
+    res.status(200).json(updatedWorkshop);
+  } catch (error) {
+    console.error("Error updating workshop:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+})
 
 module.exports = router;
