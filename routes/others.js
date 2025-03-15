@@ -11,7 +11,7 @@ const {
     deleteAwardByIndex,
     updateOutreach,
     deleteOutreach
-} = require('../controllers/partbController');
+} = require('../controllers/partbController.js');
 
 // Activities Routes
 router.put('/activities/:id/:index', updateActivityByIndex);
