@@ -42,16 +42,16 @@ app.use(cors(corsOptions));
 
 
 //using routes
-app.use("/add-user", addUser);
+app.use("/addUser", addUser);
 app.use("/articles", Articles);
 app.use("/classes", classroute);
 app.use("/fetchData", fetchData);
 app.use("/login", login);
-app.use("/proctoring", proctoring);
-app.use("/researchwork", Research);
+app.use("/proc", proctoring);
+app.use("/research", Research);
 app.use("/signup", signup);
 app.use("/users", users);
-app.use("/workshops", Workshops);
+app.use("/workshop", Workshops);
 
 // Database Connection
 const ConnectDB = async () => {
