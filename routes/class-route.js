@@ -95,7 +95,6 @@ router.put('/courses/:id', async (req, res) => {
             return res.status(404).json({ message: 'Course not found' });
         }
 
-
         res.json({ success: true, message: 'Course updated successfully', data: updatedCourse });
 
     } catch (error) {
@@ -126,9 +125,9 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.post('/feedback', async (req, res) => {
+router.post('/feedback/:userId', async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -209,9 +208,8 @@ router.delete('/feedback/:id', async (req, res) => {
     }
 });
 
-
-router.get("/fdata", async (req, res) => {
-    const userId = req.query.userId;
+router.get("/fdata/:userId", async (req, res) => {
+    const userId = req.params.userId;
     try {
         // Fetch Feedback for the logged-in teacher
         const data = await Class.find({ teacher: userId });
@@ -222,6 +220,17 @@ router.get("/fdata", async (req, res) => {
         res.status(500).json({ message: "Unable to fetch Feedback" });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
 
 router.get("/raw", async (req, res) => {
     const userId = req.query.userId;
