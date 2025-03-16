@@ -41,7 +41,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-
 //using routes
 app.use("/addUser", addUser);
 app.use("/article", Articles);
