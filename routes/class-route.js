@@ -165,9 +165,9 @@ router.get("/fdata", async (req, res) => {
 
     try {
         // Fetch Feedback for the logged-in teacher
-        const data = await Feedback.find({ teacher: userId });
+        const data = await Class.findOne({ teacher: userId });
 
-        res.status(200).json({ data });
+        res.status(200).json({ success: true, data });
     } catch (error) {
         console.error("Error fetching classes:", error);
         res.status(500).json({ message: "Unable to fetch Feedback" });
@@ -241,7 +241,7 @@ router.get("/feedback/fdata", async (req, res) => {
     try {
         const userId = req.query.userId;
         const data = await Feedback.findOne({ teacher: userId });
-        res.status(200).json({ data });
+        res.status(200).json({ success: true, data });
     } catch (error) {
         console.error("Error fetching feedback:", error);
         res.status(500).json({ message: "Unable to fetch feedback" });
