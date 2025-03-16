@@ -429,7 +429,8 @@ const deleteResponsibilityByIndex = async (req, res) => {
 // Add Activity
 const addActivity = async (req, res) => {
     try {
-        const { userId, activityDetails, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { activityDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
@@ -448,7 +449,8 @@ const addActivity = async (req, res) => {
 // Add Award
 const addAward = async (req, res) => {
     try {
-        const { userId, award, issuingOrg, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { award, issuingOrg, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
@@ -467,7 +469,8 @@ const addAward = async (req, res) => {
 // Add Contribution
 const addContribution = async (req, res) => {
     try {
-        const { userId, contributionDetails, benefit, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { contributionDetails, benefit, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
@@ -485,7 +488,8 @@ const addContribution = async (req, res) => {
 
 const addBooks = async (req, res) => {
     try {
-        const { userId, bookDetails, ISBN, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { bookDetails, ISBN, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
@@ -503,7 +507,8 @@ const addBooks = async (req, res) => {
 
 const addChapters = async (req, res) => {
     try {
-        const { userId, chapterDetails, publisher, ISBN, authorPosition, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { chapterDetails, publisher, ISBN, authorPosition, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
@@ -521,7 +526,8 @@ const addChapters = async (req, res) => {
 
 const addPapers = async (req, res) => {
     try {
-        const { userId, paperDetails, authorPosition, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { paperDetails, authorPosition, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
@@ -538,7 +544,8 @@ const addPapers = async (req, res) => {
 };
 const addArticle = async (req, res) => {
     try {
-        const { userId, articleDetails, uploadFiles } = req.body;
+        const userId = req.query.userId;
+        const { articleDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
