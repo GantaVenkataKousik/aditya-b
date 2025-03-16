@@ -24,7 +24,7 @@ router.post("/:userId", async (req, res) => {
     });
     await newWorkshop.save();
 
-    res.status(201).json({ message: "Workshop added successfully" });
+    res.status(201).json({ success: true, message: "Workshop added successfully" });
 
   } catch (error) {
     console.error("Error adding workshop:", error);
