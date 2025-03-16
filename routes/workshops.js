@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/user-model');
 const WorkshopData = require('../models/workshops');
 
-router.post("/add", async (req, res) => {
+router.post("/:userId", async (req, res) => {
   try {
     const email = req.body.email;
     const user = await User.findOne({ email });
@@ -32,7 +32,7 @@ router.post("/add", async (req, res) => {
   }
 });
 
-router.get("/data", async (req, res) => {
+router.get("/:userId", async (req, res) => {
   try {
     const userId = req.query.userId;
     const user = await User.findById(userId);
@@ -54,7 +54,7 @@ router.delete("/:id", async (req, res) => {
   try {
     const workshopId = req.params.id;
     const workshop = await WorkshopData.findByIdAndDelete(workshopId);
-    res.status(200).json({ message: "Workshop deleted successfully" });
+    res.status(200).json({ success: true, message: "Workshop deleted successfully" });
   } catch (error) {
     console.error("Error deleting workshop:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -65,7 +65,7 @@ router.put("/:id", async (req, res) => {
   try {
     const workshopId = req.params.id;
     const updatedWorkshop = await WorkshopData.findByIdAndUpdate(workshopId, req.body, { new: true });
-    res.status(200).json(updatedWorkshop);
+    res.status(200).json({ success: true, message: 'Workshop updated successfully', data: updatedWorkshop });
   } catch (error) {
     console.error("Error updating workshop:", error);
     res.status(500).json({ error: "Internal server error" });
