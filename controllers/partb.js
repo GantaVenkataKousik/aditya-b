@@ -432,11 +432,6 @@ const addActivity = async (req, res) => {
         const userId = req.params.userId;
         const { activityDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
-
-        if (!record) {
-            return res.status(404).json({ message: 'User record not found' });
-        }
-
         record.Activities.push({ activityDetails, UploadFiles: uploadFiles });
         await record.save();
 
@@ -452,10 +447,6 @@ const addAward = async (req, res) => {
         const userId = req.params.userId;
         const { award, issuingOrg, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
-
-        if (!record) {
-            return res.status(404).json({ message: 'User record not found' });
-        }
 
         record.Awards.push({ Award: award, IssuingOrg: issuingOrg, UploadFiles: uploadFiles });
         await record.save();
@@ -473,10 +464,6 @@ const addContribution = async (req, res) => {
         const { contributionDetails, benefit, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
-        if (!record) {
-            return res.status(404).json({ message: 'User record not found' });
-        }
-
         record.Contribution.push({ contributionDetails, Benefit: benefit, UploadFiles: uploadFiles });
         await record.save();
 
@@ -492,9 +479,6 @@ const addBooks = async (req, res) => {
         const { bookDetails, ISBN, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
-        if (!record) {
-            return res.status(404).json({ message: 'User record not found' });
-        }
 
         record.Books.push({ bookDetails, ISBN, UploadFiles: uploadFiles });
         await record.save();
@@ -510,11 +494,6 @@ const addChapters = async (req, res) => {
         const userId = req.query.userId;
         const { chapterDetails, publisher, ISBN, authorPosition, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
-
-        if (!record) {
-            return res.status(404).json({ message: 'User record not found' });
-        }
-
         record.Chapters.push({ chapterDetails, Publisher: publisher, ISBN, authorPosition, UploadFiles: uploadFiles });
         await record.save();
 
