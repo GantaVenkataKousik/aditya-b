@@ -38,4 +38,15 @@ router.delete('/contribution/:id/:index', deleteContributionByIndex);
 router.put('/awards/:id/:index', updateAwardByIndex);
 router.delete('/awards/:id/:index', deleteAwardByIndex);
 
+router.get("/workshop/data", async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        const data = await Workshop.findOne({ teacher: userId });
+        res.status(200).json({ data });
+    } catch (error) {
+        console.error("Error fetching workshops:", error);
+        res.status(500).json({ message: "Unable to fetch workshops" });
+    }
+});
+
 module.exports = router;

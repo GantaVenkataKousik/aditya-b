@@ -240,7 +240,7 @@ router.post('/courses/add', async (req, res) => {
 router.get("/feedback/fdata", async (req, res) => {
     try {
         const userId = req.query.userId;
-        const data = await Feedback.find({ teacher: userId });
+        const data = await Feedback.findOne({ teacher: userId });
         res.status(200).json({ data });
     } catch (error) {
         console.error("Error fetching feedback:", error);
