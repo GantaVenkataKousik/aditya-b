@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const classSchema = new mongoose.Schema({
 
-    courseName: { type: String, required: true },
-    semester: { type: String, required: true },
+    courseName: { type: String, },
+    semester: { type: String, },
 
-    numberOfStudents: { type: Number, required: true },
+    numberOfStudents: { type: Number, },
 
-    passCount: { type: Number, required: true },
-    passPercentage: { type: Number, required: true },
+    passCount: { type: Number, },
+    passPercentage: { type: Number, },
     averagePercentage: Number,
     selfAssessmentMarks: Number,
     above95: { type: Number, default: 0 },

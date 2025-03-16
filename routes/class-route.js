@@ -144,7 +144,8 @@ router.post('/feedback/:userId', async (req, res) => {
             courseName,
             semester,
             numberOfStudents,
-            feedbackpercent
+            feedbackpercent,
+
         } = req.body;
 
         if (!numberOfStudents || feedbackpercent === undefined) {
