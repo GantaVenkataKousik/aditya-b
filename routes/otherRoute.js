@@ -29,8 +29,8 @@ router.put('/responsibilities/:id/:index', updateResponsibilityByIndex);
 router.delete('/responsibilities/:id/:index', deleteResponsibilityByIndex);
 
 // Contributions Routes
-router.put('/contributions/:id/:index', updateContributionByIndex);
-router.delete('/contributions/:id/:index', deleteContributionByIndex);
+router.put('/contribution/:id/:index', updateContributionByIndex);
+router.delete('/contribution/:id/:index', deleteContributionByIndex);
 
 // Awards Routes
 router.put('/awards/:id/:index', updateAwardByIndex);
