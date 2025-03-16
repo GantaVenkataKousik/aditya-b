@@ -6,7 +6,7 @@ const Feedback = require('../models/Feedback');
 const mongoose = require('mongoose');
 
 
-router.post('/classes', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const userId = req.query.userId;
         const user = await User.findById(userId);
@@ -205,17 +205,17 @@ router.delete("/courses/:id", async (req, res) => {
 
 router.put('/courses/:id', async (req, res) => {
     try {
-        const courseId = req.params.id;
+        const classId = req.params.classId;
         const { courseName, semester, numberOfStudents, passCount } = req.body;
         // Update the course    
         const updatedCourse = await Class.findByIdAndUpdate(
-            courseId,
+            classId,
             { courseName, semester, numberOfStudents, passCount },
             { new: true, runValidators: true }
         );
 
         if (!updatedCourse) {
-            console.log("No course found with ID:", id);
+            console.log("No course found with ID:", classId);
             return res.status(404).json({ message: 'Course not found' });
         }
 
@@ -227,6 +227,24 @@ router.put('/courses/:id', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
-
-
+router.post('/courses/add', async (req, res) => {
+    try {
+        const { courseName, semester, numberOfStudents, passCount } = req.body;
+        const newCourse = new Class({ courseName, semester, numberOfStudents, passCount });
+        await newCourse.save();
+        res.status(200).json({ success: true, message: 'Course added successfully', course: newCourse });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+router.get('/courses/:id', async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        const course = await Class.find({ teacher: userId });
+        res.status(200).json({ Data: course });
+    } catch (error) {
+        console.error('Error fetching course:', error.message);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
 module.exports = router;

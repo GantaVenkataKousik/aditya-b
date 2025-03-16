@@ -6,7 +6,6 @@ const User = require('../models/user-model');
 const Others = require('../models/othersModel');
 
 
-
 //Feedback Controllers
 const updateFeedback = async (req, res) => {
     try {
