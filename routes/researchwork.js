@@ -248,9 +248,18 @@ router.get("/researchtext", async (req, res) => {
 });
 
 
-router.post("/addsciarticles", async (req, res) => {
+
+
+
+
+
+
+
+
+
+router.post("/sciarticles/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     const { articleDetails, ISSN, authorPosition } = req.body;
     let researchEntry = await ResearchData.findOne({ userId });
     if (!researchEntry) {
@@ -271,10 +280,52 @@ router.post("/addsciarticles", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 })
-
-router.post("/addwosarticles", async (req, res) => {
+router.get("/sciarticles/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
+    const researchEntry = await ResearchData.findOne({ userId });
+    res.status(200).json(researchEntry.SciArticles);
+  } catch (error) {
+    console.error("Error while fetching SCI articles:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.delete("/sciarticles/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.SciArticles.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Article deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting SCI article:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/sciarticles/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.SciArticles[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Article updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating SCI article:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+
+
+
+
+
+
+router.post("/wosarticles", async (req, res) => {
+  try {
+    const userId = req.params.userId;
     const { articleDetails, ISSN, authorPosition } = req.body;
     let researchEntry = await ResearchData.findOne({ userId });
     if (!researchEntry) {
@@ -295,10 +346,55 @@ router.post("/addwosarticles", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 })
-
-router.post("/addproposals", async (req, res) => {
+router.get("/wosarticles/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
+    const researchEntry = await ResearchData.findOne({ userId });
+    res.status(200).json(researchEntry.WosArticles);
+  } catch (error) {
+    console.error("Error while fetching Wos articles:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.delete("/wosarticles/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.WosArticles.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Article deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Wos article:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/wosarticles/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.WosArticles[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Article updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating Wos article:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+
+
+
+
+
+
+
+
+
+router.post("/proposals/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
     const { proposalDetails, fundingAgency, amount } = req.body;
     let researchEntry = await ResearchData.findOne({ userId });
     if (!researchEntry) {
@@ -319,34 +415,52 @@ router.post("/addproposals", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 })
-
-router.post("/addpapers", async (req, res) => {
+router.get("/proposals/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { paperDetails, authorPosition } = req.body;
-    let researchEntry = await ResearchData.findOne({ userId });
-    if (!researchEntry) {
-      researchEntry = new ResearchData({
-        userId,
-        Papers: [{ paperDetails, authorPosition }]
-      });
-    } else {
-      researchEntry.Papers.push({ paperDetails, authorPosition });
-    }
-
-    // Save the updated document
-    await researchEntry.save();
-    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
-
+    const userId = req.params.userId;
+    const researchEntry = await ResearchData.findOne({ userId });
+    res.status(200).json(researchEntry.Proposals);
   } catch (error) {
-    console.error("Error while adding article:", error);
+    console.error("Error while fetching Proposals:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.delete("/proposals/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Proposals.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Proposal deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Proposal:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/proposals/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Proposals[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Proposal updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating Proposal:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 })
 
-router.post("/addbooks", async (req, res) => {
+
+
+
+
+
+
+router.post("/books/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     const { bookDetails, ISBN } = req.body;
     let researchEntry = await ResearchData.findOne({ userId });
     if (!researchEntry) {
@@ -367,8 +481,50 @@ router.post("/addbooks", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 })
+router.get("/books/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const researchEntry = await ResearchData.findOne({ userId });
+    res.status(200).json(researchEntry.Books);
+  } catch (error) {
+    console.error("Error while fetching Books:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.delete("/books/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Books.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Book deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Book:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/books/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Books[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Book updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating Book:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
 
-router.post("/addchapters", async (req, res) => {
+
+
+
+
+
+
+router.post("/chapters/:userId", async (req, res) => {
   try {
     const userId = req.user._id;
     const { chapterDetails, Publisher, ISBN, authorPosition } = req.body;
@@ -391,30 +547,55 @@ router.post("/addchapters", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 })
-
-router.post("/addpgranted", async (req, res) => {
+router.get("/chapters/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { PTitle, PNumber, CountryGranted, GrantedDate } = req.body;
-    let researchEntry = await ResearchData.findOne({ userId });
-    if (!researchEntry) {
-      researchEntry = new ResearchData({
-        userId,
-        PGranted: [{ PTitle, PNumber, CountryGranted, GrantedDate }]
-      });
-    } else {
-      researchEntry.PGranted.push({ PTitle, PNumber, CountryGranted, GrantedDate });
-    }
-
-    // Save the updated document
-    await researchEntry.save();
-    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
-
+    const userId = req.params.userId;
+    const researchEntry = await ResearchData.findOne({ userId });
+    res.status(200).json(researchEntry.Chapters);
   } catch (error) {
-    console.error("Error while adding article:", error);
+    console.error("Error while fetching Chapters:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 })
+router.delete("/chapters/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Chapters.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Chapter deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Chapter:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/chapters/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Chapters[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Chapter updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating Chapter:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 router.post("/addpfiled", async (req, res) => {
   try {
@@ -441,37 +622,12 @@ router.post("/addpfiled", async (req, res) => {
 })
 
 
-router.get("/sciarticles", async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const researchEntry = await ResearchData.findOne({ userId });
 
-    if (!researchEntry || researchEntry.SciArticles.length === 0) {
-      return res.status(404).json({ message: "No articles found" });
-    }
 
-    res.status(200).json(researchEntry.SciArticles);
-  } catch (error) {
-    console.error("Error fetching SCI articles:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
 
-router.get("/wosarticles", async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const researchEntry = await ResearchData.findOne({ userId });
 
-    if (!researchEntry || researchEntry.WosArticles.length === 0) {
-      return res.status(404).json({ message: "No articles found" });
-    }
 
-    res.status(200).json(researchEntry.WosArticles);
-  } catch (error) {
-    console.error("Error fetching Wos articles:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+
 
 router.get("/proposals", async (req, res) => {
   try {
@@ -490,9 +646,20 @@ router.get("/proposals", async (req, res) => {
 });
 
 
-router.get("/papers", async (req, res) => {
+
+
+
+
+
+
+
+
+
+
+
+router.get("/papers/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     const researchEntry = await ResearchData.findOne({ userId });
 
     if (!researchEntry || researchEntry.Papers.length === 0) {
@@ -505,42 +672,81 @@ router.get("/papers", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-router.get("/books", async (req, res) => {
+router.post("/papers/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
-    const researchEntry = await ResearchData.findOne({ userId });
-
-    if (!researchEntry || researchEntry.Books.length === 0) {
-      return res.status(404).json({ message: "No Books found" });
+    const userId = req.params.userId;
+    const { paperDetails, authorPosition } = req.body;
+    let researchEntry = await ResearchData.findOne({ userId });
+    if (!researchEntry) {
+      researchEntry = new ResearchData({
+        userId,
+        Papers: [{ paperDetails, authorPosition }]
+      });
+    } else {
+      researchEntry.Papers.push({ paperDetails, authorPosition });
     }
 
-    res.status(200).json(researchEntry.Books);
+    // Save the updated document
+    await researchEntry.save();
+    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
+
   } catch (error) {
-    console.error("Error fetching Books:", error);
+    console.error("Error while adding article:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-});
-
-router.get("/chapters", async (req, res) => {
+})
+router.put("/papers/:userId/:index", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
+    const index = req.params.index;
     const researchEntry = await ResearchData.findOne({ userId });
-
-    if (!researchEntry || researchEntry.Books.Chapters === 0) {
-      return res.status(404).json({ message: "No Chapters found" });
-    }
-
-    res.status(200).json(researchEntry.Chapters);
+    researchEntry.Papers[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Paper updated successfully!" });
   } catch (error) {
-    console.error("Error fetching Chapters:", error);
+    console.error("Error while updating Paper:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-});
-
-router.get("/pgranted", async (req, res) => {
+})
+router.delete("/papers/:userId/:index", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.Papers.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Paper deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Paper:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get("/pgranted/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
     const researchEntry = await ResearchData.findOne({ userId });
 
     if (!researchEntry || researchEntry.PGranted.length === 0) {
@@ -553,10 +759,70 @@ router.get("/pgranted", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-router.get("/pfiled", async (req, res) => {
+router.post("/pgranted/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
+    const { PTitle, PNumber, CountryGranted, GrantedDate } = req.body;
+    let researchEntry = await ResearchData.findOne({ userId });
+    if (!researchEntry) {
+      researchEntry = new ResearchData({
+        userId,
+        PGranted: [{ PTitle, PNumber, CountryGranted, GrantedDate }]
+      });
+    } else {
+      researchEntry.PGranted.push({ PTitle, PNumber, CountryGranted, GrantedDate });
+    }
+
+    // Save the updated document    
+    await researchEntry.save();
+    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
+
+  } catch (error) {
+    console.error("Error while adding article:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/pgranted/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.PGranted[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Patent Granted updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating Patent Granted:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.delete("/pgranted/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.PGranted.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Patent Granted deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Patent Granted:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+router.get("/pfiled/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
     const researchEntry = await ResearchData.findOne({ userId });
 
     if (!researchEntry || researchEntry.PFiled.length === 0) {
@@ -569,6 +835,70 @@ router.get("/pfiled", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+router.post("/pfiled/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { PTitle, PNumber, FiledinCountry, PublishedDate } = req.body;
+    let researchEntry = await ResearchData.findOne({ userId });
+    if (!researchEntry) {
+      researchEntry = new ResearchData({
+        userId,
+        PFiled: [{ PTitle, PNumber, FiledinCountry, PublishedDate }]
+      });
+    } else {
+      researchEntry.PFiled.push({ PTitle, PNumber, FiledinCountry, PublishedDate });
+    }
+
+    // Save the updated document  
+    await researchEntry.save();
+    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
+
+  } catch (error) {
+    console.error("Error while adding article:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.put("/pfiled/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.PFiled[index] = req.body;
+    await researchEntry.save();
+    res.status(200).json({ message: "Patent Filed updated successfully!" });
+  } catch (error) {
+    console.error("Error while updating Patent Filed:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+router.delete("/pfiled/:userId/:index", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const index = req.params.index;
+    const researchEntry = await ResearchData.findOne({ userId });
+    researchEntry.PFiled.splice(index, 1);
+    await researchEntry.save();
+    res.status(200).json({ message: "Patent Filed deleted successfully!" });
+  } catch (error) {
+    console.error("Error while deleting Patent Filed:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 router.get("/getdata", async (req, res) => {
   try {

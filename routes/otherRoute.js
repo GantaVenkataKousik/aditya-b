@@ -54,11 +54,12 @@ router.get('/others-data', async (req, res) => {
     }
 });
 
-router.post('/add-article', addArticle);
-router.post('/add-activity', addActivity);
-router.post('/add-award', addAward);
-router.post('/add-books', addBooks);
-router.post('/add-chapters', addChapters);
-router.post('/add-contribution', addContribution);
-router.post('/add-papers', addPapers);
+router.post('/add-article/:userId', addArticle);
+router.post('/add-activity/:userId', addActivity);
+router.post('/add-award/:userId', addAward);
+router.post('/add-books/:userId', addBooks);
+router.post('/add-chapters/:userId', addChapters);
+router.post('/add-contribution/:userId', addContribution);
+router.post('/add-papers/:userId', addPapers);
+router.post('/add-responsibility/:userId', addResponsibility);
 module.exports = router;

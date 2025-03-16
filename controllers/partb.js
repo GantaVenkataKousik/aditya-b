@@ -560,6 +560,24 @@ const addArticle = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+const addResponsibility = async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        const { responsibility, uploadFiles } = req.body;
+        const record = await Others.findOne({ userId });
+
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        record.Responsibilities.push({ Responsibility: responsibility, UploadFiles: uploadFiles });
+        await record.save();
+
+        res.json({ success: true, message: 'Responsibility added successfully', responsibilities: record.Responsibilities });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
 
 
 module.exports = {
