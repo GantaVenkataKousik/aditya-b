@@ -488,7 +488,7 @@ const addContribution = async (req, res) => {
 
 const addBooks = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const { bookDetails, ISBN, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
