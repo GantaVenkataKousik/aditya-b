@@ -44,7 +44,7 @@ router.delete('/outreach/:id', deleteOutreach);
 router.get('/others-data', async (req, res) => {
     try {
         const userId = req.query.userId;
-        const others = await Others.find({ userId });
+        const others = await Others.findOne({ userId });
         res.json({
             success: true,
             data: others
