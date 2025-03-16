@@ -147,11 +147,6 @@ router.post('/feedback/:userId', async (req, res) => {
             feedbackpercent,
 
         } = req.body;
-
-        if (!numberOfStudents || feedbackpercent === undefined) {
-            return res.status(400).json({ error: 'numberOfStudents and feedbackpercent are required fields' });
-        }
-
         // Fetch all feedback for the user
         const feedbacks = await Feedback.find({ teacher: user._id });
         const totalFeedbackPercentage = feedbacks.reduce((acc, fb) => acc + fb.feedbackPercentage, 0);
