@@ -237,4 +237,14 @@ router.post('/courses/add', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
+router.get("/feedback/fdata", async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        const data = await Feedback.find({ teacher: userId });
+        res.status(200).json({ data });
+    } catch (error) {
+        console.error("Error fetching feedback:", error);
+        res.status(500).json({ message: "Unable to fetch feedback" });
+    }
+});
 module.exports = router;
