@@ -6,9 +6,9 @@ const Feedback = require('../models/Feedback');
 const mongoose = require('mongoose');
 
 
-router.post('/', async (req, res) => {
+router.post('/courses/addclass/:userId', async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -64,6 +64,56 @@ router.post('/', async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+router.delete("/courses/:id", async (req, res) => {
+    try {
+        const courseId = req.params.id;
+        const deletedCourse = await Class.findByIdAndDelete(courseId);
+        if (!deletedCourse) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+        res.json({ message: "Course deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting course:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.put('/courses/:id', async (req, res) => {
+    try {
+        const classId = req.params.id;
+        const { courseName, semester, numberOfStudents, passCount } = req.body;
+        // Update the course    
+        const updatedCourse = await Class.findByIdAndUpdate(
+            classId,
+            { courseName, semester, numberOfStudents, passCount },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedCourse) {
+            console.log("No course found with ID:", classId);
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+
+        res.json(updatedCourse);
+
+    } catch (error) {
+        console.error('Error updating course:', error.message);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 router.put('/:id', async (req, res) => {
     try {
         const classId = req.params.id;
@@ -187,45 +237,6 @@ router.get("/raw", async (req, res) => {
     }
 });
 
-router.delete("/courses/:id", async (req, res) => {
-    try {
-        const courseId = req.params.id;
-        const deletedCourse = await Class.findByIdAndDelete(courseId);
-        if (!deletedCourse) {
-            return res.status(404).json({ message: "Course not found" });
-        }
-        res.json({ message: "Course deleted successfully" });
-    } catch (error) {
-        console.error("Error deleting course:", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-
-router.put('/courses/:id', async (req, res) => {
-    try {
-        const classId = req.params.classId;
-        const { courseName, semester, numberOfStudents, passCount } = req.body;
-        // Update the course    
-        const updatedCourse = await Class.findByIdAndUpdate(
-            classId,
-            { courseName, semester, numberOfStudents, passCount },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedCourse) {
-            console.log("No course found with ID:", classId);
-            return res.status(404).json({ message: 'Course not found' });
-        }
-
-
-        res.json(updatedCourse);
-
-    } catch (error) {
-        console.error('Error updating course:', error.message);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
 router.post('/courses/add', async (req, res) => {
     try {
         const { courseName, semester, numberOfStudents, passCount } = req.body;
