@@ -5,8 +5,8 @@ const WorkshopData = require('../models/workshops');
 
 router.post("/:userId", async (req, res) => {
   try {
-    const email = req.body.email;
-    const user = await User.findOne({ email });
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -34,7 +34,7 @@ router.post("/:userId", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   try {
-    const userId = req.query.userId;
+    const userId = req.params.userId;
     const user = await User.findById(userId);
     const Workshops = await WorkshopData.find({ User: userId });
     const TotalMarks = Workshops.length * 5;
@@ -42,7 +42,7 @@ router.get("/:userId", async (req, res) => {
       user.WorkshopMarks = TotalMarks;
       await user.save();
     }
-    res.status(200).json({ Workshops, TotalMarks });
+    res.status(200).json({ success: true, Workshops, TotalMarks });
 
   } catch (error) {
     console.log("Unable to fetch the data:", error);
