@@ -3,8 +3,7 @@ const Proctoring = require('../models/ProctoringModel');
 const Research = require('../models/research');
 const Workshops = require('../models/workshops');
 const User = require('../models/user-model');
-const Others = require('../models/othersModel');
-
+const Others = require('../models/othersModel.js');
 
 //Feedback Controllers
 const updateFeedback = async (req, res) => {
@@ -35,6 +34,10 @@ const deleteFeedback = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+
+
+
 
 //Proctoring Controllers
 const updateProctoring = async (req, res) => {
@@ -146,6 +149,8 @@ const updateOutreach = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 }
+
+
 
 const deleteOutreach = async (req, res) => {
     try {
@@ -405,7 +410,9 @@ const deleteResponsibilityByIndex = async (req, res) => {
         if (index < 0 || index >= record.Responsibilities.length) {
             return res.status(400).json({ message: 'Invalid responsibility index' });
         }
+
         record.Responsibilities.splice(index, 1);
+
         await record.save();
 
         res.json({
@@ -417,6 +424,7 @@ const deleteResponsibilityByIndex = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
 
 // Add Activity
 const addActivity = async (req, res) => {
@@ -545,8 +553,6 @@ const addArticle = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
-
 
 
 module.exports = {
