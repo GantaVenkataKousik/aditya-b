@@ -17,7 +17,8 @@ const {
     addBooks,
     addChapters,
     addContribution,
-    addPapers
+    addPapers,
+    addResponsibility
 } = require('../controllers/partb.js');
 const Others = require('../models/othersModel');
 // Activities Routes

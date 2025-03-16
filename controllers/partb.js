@@ -605,5 +605,6 @@ module.exports = {
     addBooks,
     addChapters,
     addPapers,
-    addArticle
+    addArticle,
+    addResponsibility
 };   

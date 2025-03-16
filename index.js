@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 const cors = require("cors");
+const { createResearchEntries } = require("./service");
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,7 +41,7 @@ const corsOptions = {
     exposedHeaders: ['Authorization']
 };
 app.use(cors(corsOptions));
-
+// createResearchEntries();
 //using routes
 app.use("/addUser", addUser);
 app.use("/article", Articles);
