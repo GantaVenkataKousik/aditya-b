@@ -103,9 +103,16 @@ router.put('/courses/:id', async (req, res) => {
     }
 });
 
-
-
-
+router.get("/courses/:userId", async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        const data = await Class.find({ teacher: userId });
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error("Error fetching classes:", error);
+        res.status(500).json({ message: "Unable to fetch classes" });
+    }
+});
 
 
 
@@ -220,8 +227,6 @@ router.get("/feedback/:userId", async (req, res) => {
         res.status(500).json({ message: "Unable to fetch Feedback" });
     }
 });
-
-
 
 
 
