@@ -3,22 +3,22 @@ const mongoose = require("mongoose");
 const othersSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   Activities: [{
-    activityDetails: { type: String, required: true },
+    activityDetails: { type: String, },
     UploadFiles: [{ Image: { type: String } }]
   }],
   Responsibilities: [{
-    Responsibility: { type: String, required: true },
-    assignedBy: { type: String, required: true },
+    Responsibility: { type: String, },
+    assignedBy: { type: String, },
     UploadFiles: [{ Image: { type: String } }]
   }],
   Contribution: [{
-    contributionDetails: { type: String, required: true },
-    Benefit: { type: String, required: true },
+    contributionDetails: { type: String, },
+    Benefit: { type: String, },
     UploadFiles: [{ Image: { type: String } }]
   }],
   Awards: [{
-    Award: { type: String, required: true },
-    IssuingOrg: { type: String, required: true },
+    Award: { type: String, },
+    IssuingOrg: { type: String, },
     UploadFiles: [{ Image: { type: String } }]
   }],
 })
