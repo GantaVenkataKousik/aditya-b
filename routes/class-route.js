@@ -72,7 +72,7 @@ router.delete("/courses/:id", async (req, res) => {
         if (!deletedCourse) {
             return res.status(404).json({ message: "Course not found" });
         }
-        res.json({ message: "Course deleted successfully" });
+        res.json({ success: true, message: "Course deleted successfully" });
     } catch (error) {
         console.error("Error deleting course:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
@@ -96,7 +96,7 @@ router.put('/courses/:id', async (req, res) => {
         }
 
 
-        res.json(updatedCourse);
+        res.json({ success: true, message: 'Course updated successfully', data: updatedCourse });
 
     } catch (error) {
         console.error('Error updating course:', error.message);
