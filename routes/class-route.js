@@ -204,7 +204,7 @@ router.delete('/feedback/:id', async (req, res) => {
     try {
         const feedbackId = req.params.id;
         const deletedFeedback = await Feedback.findByIdAndDelete(feedbackId);
-        res.status(200).json({ message: "Feedback deleted successfully" });
+        res.status(200).json({ success: true, message: "Feedback deleted successfully" });
     } catch (error) {
         console.error('Error deleting feedback:', error);
         res.status(400).json({ error: error.message });
