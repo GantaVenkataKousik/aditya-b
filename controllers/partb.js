@@ -429,7 +429,7 @@ const deleteResponsibilityByIndex = async (req, res) => {
 // Add Activity
 const addActivity = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const { activityDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -449,7 +449,7 @@ const addActivity = async (req, res) => {
 // Add Award
 const addAward = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const { award, issuingOrg, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -469,7 +469,7 @@ const addAward = async (req, res) => {
 // Add Contribution
 const addContribution = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const { contributionDetails, benefit, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -544,7 +544,7 @@ const addPapers = async (req, res) => {
 };
 const addArticle = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const { articleDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -562,15 +562,15 @@ const addArticle = async (req, res) => {
 };
 const addResponsibility = async (req, res) => {
     try {
-        const userId = req.query.userId;
-        const { responsibility, uploadFiles } = req.body;
+        const userId = req.params.userId;
+        const { responsibility, assignedBy, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
             return res.status(404).json({ message: 'User record not found' });
         }
 
-        record.Responsibilities.push({ Responsibility: responsibility, UploadFiles: uploadFiles });
+        record.Responsibilities.push({ Responsibility: responsibility, assignedBy: assignedBy, UploadFiles: uploadFiles });
         await record.save();
 
         res.json({ success: true, message: 'Responsibility added successfully', responsibilities: record.Responsibilities });
