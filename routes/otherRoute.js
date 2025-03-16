@@ -47,7 +47,7 @@ router.get('/others-data', async (req, res) => {
         const others = await Others.findOne({ userId });
         res.json({
             success: true,
-            data: others
+            others,
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
