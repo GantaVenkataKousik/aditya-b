@@ -8,7 +8,7 @@ router.get("/:userId", async (req, res) => {
         const userId = req.params.userId;  // Get userId from logged-in user
         const data = await Proctoring.find({ teacher: userId });
         const totalPassPercentage = data.reduce((sum, item) => sum + (item.passedStudents / item.eligibleStudents) * 100, 0) / data.length;
-        res.json({ data, averagePercentage: totalPassPercentage.toFixed(2) });
+        res.status(200).json({ success: true, message: 'Proctoring data fetched successfully', data, averagePercentage: totalPassPercentage.toFixed(2) });
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch data" });
     }
@@ -70,7 +70,7 @@ router.post("/:userId", async (req, res) => {
         await user.save();
 
         // Respond with saved data
-        res.status(201).json({ newProctoring });
+        res.status(200).json({ success: true, message: 'Proctoring data added successfully', data: newProctoring });
 
     } catch (error) {
         console.error("Error processing proctoring data:", error);
@@ -82,7 +82,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const proctoringId = req.params.id;
         const deletedProctoring = await Proctoring.findByIdAndDelete(proctoringId);
-        res.status(200).json({ message: "Proctoring data deleted successfully" });
+        res.status(200).json({ success: true, message: "Proctoring data deleted successfully" });
     } catch (error) {
         console.error('Error deleting proctoring data:', error);
         res.status(400).json({ error: error.message });
@@ -94,7 +94,7 @@ router.put('/:id', async (req, res) => {
         const proctoringId = req.params.id;
         const { totalStudents, semesterBranchSec, eligibleStudents, passedStudents } = req.body;
         const updatedProctoring = await Proctoring.findByIdAndUpdate(proctoringId, { totalStudents, semesterBranchSec, eligibleStudents, passedStudents }, { new: true });
-        res.status(200).json(updatedProctoring);
+        res.status(200).json({ success: true, message: 'Proctoring data updated successfully', data: updatedProctoring });
     } catch (error) {
         console.error('Error updating proctoring data:', error);
         res.status(400).json({ error: error.message });

@@ -58,7 +58,7 @@ router.post('/courses/addclass/:userId', async (req, res) => {
         await user.save(); // Save the updated user document
 
         // Respond with the saved class and average pass percentage
-        res.status(201).json({ savedClass, averagePassPercentage });
+        res.status(200).json({ success: true, message: 'Class added successfully', data: savedClass, averagePassPercentage });
     } catch (error) {
         console.error('Error saving class:', error);
         res.status(400).json({ error: error.message });
@@ -72,7 +72,7 @@ router.delete("/courses/:id", async (req, res) => {
         if (!deletedCourse) {
             return res.status(404).json({ message: "Course not found" });
         }
-        res.json({ success: true, message: "Course deleted successfully" });
+        res.status(200).json({ success: true, message: "Course deleted successfully" });
     } catch (error) {
         console.error("Error deleting course:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
@@ -95,7 +95,7 @@ router.put('/courses/:id', async (req, res) => {
             return res.status(404).json({ message: 'Course not found' });
         }
 
-        res.json({ success: true, message: 'Course updated successfully', data: updatedCourse });
+        res.status(200).json({ success: true, message: 'Course updated successfully', data: updatedCourse });
 
     } catch (error) {
         console.error('Error updating course:', error.message);
@@ -125,7 +125,7 @@ router.put('/:id', async (req, res) => {
         const classId = req.params.id;
         const { courseName, semester, numberOfStudents, passCount } = req.body;
         const updatedClass = await Class.findByIdAndUpdate(classId, { courseName, semester, numberOfStudents, passCount }, { new: true });
-        res.status(200).json(updatedClass);
+        res.status(200).json({ success: true, message: 'Class updated successfully', data: updatedClass });
     } catch (error) {
         console.error('Error updating class:', error);
         res.status(400).json({ error: error.message });
@@ -185,7 +185,7 @@ router.post('/feedback/:userId', async (req, res) => {
         const savedFeedback = await newFeedback.save();
 
         // Respond with the saved feedback and updated user details
-        res.status(201).json({ savedFeedback, averageFeedbackPercentage, updatedUserMarks: user.couAvgPerMarks });
+        res.status(200).json({ success: true, message: 'Feedback added successfully', data: savedFeedback, averageFeedbackPercentage, updatedUserMarks: user.courseAvgPerMarks });
     } catch (error) {
         console.error('Error saving feedback:', error);
         res.status(400).json({ error: error.message });
@@ -197,7 +197,7 @@ router.put('/feedback/:id', async (req, res) => {
         const feedbackId = req.params.id;
         const { courseName, semester, numberOfStudents, feedbackpercent } = req.body;
         const updatedFeedback = await Feedback.findByIdAndUpdate(feedbackId, { courseName, semester, numberOfStudents, feedbackpercent }, { new: true });
-        res.status(200).json(updatedFeedback);
+        res.status(200).json({ success: true, message: 'Feedback updated successfully', data: updatedFeedback });
     } catch (error) {
         console.error('Error updating feedback:', error);
         res.status(400).json({ error: error.message });
@@ -219,11 +219,11 @@ router.get("/feedback/:userId", async (req, res) => {
     const userId = req.params.userId;
     try {
         // Fetch Feedback for the logged-in teacher
-        const data = await Class.find({ teacher: userId });
+        const data = await Feedback.find({ teacher: userId });
 
         res.status(200).json({ success: true, data });
     } catch (error) {
-        console.error("Error fetching classes:", error);
+        console.error("Error fetching Feedback:", error);
         res.status(500).json({ message: "Unable to fetch Feedback" });
     }
 });
