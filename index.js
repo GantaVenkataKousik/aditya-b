@@ -47,7 +47,7 @@ app.use("/article", Articles);
 app.use("/classes", classroute);
 app.use("/fetchData", fetchData);
 app.use("/login", login);
-app.use("/proc", proctoring);
+app.use("/proctoring", proctoring);
 app.use("/research", Research);
 app.use("/signup", signup);
 app.use("/users", users);

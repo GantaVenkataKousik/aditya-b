@@ -3,9 +3,9 @@ const router = express.Router();
 const Proctoring = require("../models/ProctoringModel");
 const User = require("../models/user-model");
 // Fetch all proctoring data
-router.get("/proctoring-data", async (req, res) => {
+router.get("/:userId", async (req, res) => {
     try {
-        const userId = req.query.userId;  // Get userId from logged-in user
+        const userId = req.params.userId;  // Get userId from logged-in user
         const data = await Proctoring.find({ teacher: userId });
         const totalPassPercentage = data.reduce((sum, item) => sum + (item.passedStudents / item.eligibleStudents) * 100, 0) / data.length;
         res.json({ data, averagePercentage: totalPassPercentage.toFixed(2) });
@@ -15,10 +15,10 @@ router.get("/proctoring-data", async (req, res) => {
 });
 
 // Add new proctoring data
-router.post("/proctoring-data", async (req, res) => {
+router.post("/:userId", async (req, res) => {
     try {
         // Fetch the logged-in user
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -78,7 +78,7 @@ router.post("/proctoring-data", async (req, res) => {
     }
 });
 
-router.delete('/proctoring/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const proctoringId = req.params.id;
         const deletedProctoring = await Proctoring.findByIdAndDelete(proctoringId);
@@ -89,7 +89,7 @@ router.delete('/proctoring/:id', async (req, res) => {
     }
 });
 
-router.put('/proctoring/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const proctoringId = req.params.id;
         const { totalStudents, semesterBranchSec, eligibleStudents, passedStudents } = req.body;
