@@ -208,7 +208,7 @@ router.delete('/feedback/:id', async (req, res) => {
     }
 });
 
-router.get("/fdata/:userId", async (req, res) => {
+router.get("/feedback/:userId", async (req, res) => {
     const userId = req.params.userId;
     try {
         // Fetch Feedback for the logged-in teacher
