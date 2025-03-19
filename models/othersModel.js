@@ -18,7 +18,9 @@ const othersSchema = new mongoose.Schema({
   }],
   Awards: [{
     Award: { type: String, },
-    IssuingOrg: { type: String, },
+    AwardedBy: { type: String, },
+    Level: { type: String, },
+    Description: { type: String, },
     UploadFiles: [{ Image: { type: String } }]
   }],
 })

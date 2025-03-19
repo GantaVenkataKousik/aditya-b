@@ -445,10 +445,10 @@ const addActivity = async (req, res) => {
 const addAward = async (req, res) => {
     try {
         const userId = req.params.userId;
-        const { award, issuingOrg, uploadFiles } = req.body;
+        const { awardName, awardedBy, level, description } = req.body;
         const record = await Others.findOne({ userId });
 
-        record.Awards.push({ Award: award, IssuingOrg: issuingOrg, UploadFiles: uploadFiles });
+        record.Awards.push({ Award: awardName, AwardedBy: awardedBy, Level: level, Description: description });
         await record.save();
 
         res.json({ success: true, message: 'Award added successfully', awards: record.Awards });
