@@ -145,7 +145,6 @@ router.post('/feedback/:userId', async (req, res) => {
             semester,
             numberOfStudents,
             feedbackpercent,
-
         } = req.body;
         // Fetch all feedback for the user
         const feedbacks = await Feedback.find({ teacher: user._id });
@@ -180,7 +179,6 @@ router.post('/feedback/:userId', async (req, res) => {
         // Save the new feedback to the database
         const savedFeedback = await newFeedback.save();
 
-        // Respond with the saved feedback and updated user details
         res.status(200).json({ success: true, message: 'Feedback added successfully', data: savedFeedback, averageFeedbackPercentage, updatedUserMarks: user.courseAvgPerMarks });
     } catch (error) {
         console.error('Error saving feedback:', error);
