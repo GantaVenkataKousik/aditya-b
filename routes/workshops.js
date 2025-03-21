@@ -3,25 +3,7 @@ const router = express.Router();
 const User = require('../models/user-model');
 const WorkshopData = require('../models/workshops');
 
-// Get all workshops (for HOD/Dean view)
-router.get("/all", async (req, res) => {
-  try {
-    const workshops = await WorkshopData.find()
-      .populate('User', 'fullName department');
-    res.status(200).json({
-      success: true,
-      Workshops: workshops
-    });
-  } catch (error) {
-    console.error("Error fetching all workshops:", error);
-    res.status(500).json({
-      success: false,
-      message: "Unable to fetch workshops"
-    });
-  }
-});
 
-// Get workshops for specific user
 router.get("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -40,7 +22,6 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-// Add new workshop
 router.post("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
