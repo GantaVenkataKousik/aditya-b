@@ -46,7 +46,7 @@ router.get('/others-data', async (req, res) => {
     try {
         const userId = req.query.userId;
         const others = await Others.findOne({ userId });
-        res.json({
+        res.status(200).json({
             success: true,
             others,
         });

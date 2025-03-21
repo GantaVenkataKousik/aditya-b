@@ -467,7 +467,7 @@ const addContribution = async (req, res) => {
         record.Contribution.push({ contributionDetails, Benefit: benefit, UploadFiles: uploadFiles });
         await record.save();
 
-        res.json({ success: true, message: 'Contribution added successfully', contributions: record.Contribution });
+        res.status(200).json({ success: true, message: 'Contribution added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -483,7 +483,7 @@ const addBooks = async (req, res) => {
         record.Books.push({ bookDetails, ISBN, UploadFiles: uploadFiles });
         await record.save();
 
-        res.json({ success: true, message: 'Books added successfully', books: record.Books });
+        res.status(200).json({ success: true, message: 'Books added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -497,7 +497,7 @@ const addChapters = async (req, res) => {
         record.Chapters.push({ chapterDetails, Publisher: publisher, ISBN, authorPosition, UploadFiles: uploadFiles });
         await record.save();
 
-        res.json({ success: true, message: 'Chapters added successfully', chapters: record.Chapters });
+        res.status(200).json({ success: true, message: 'Chapters added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -516,7 +516,7 @@ const addPapers = async (req, res) => {
         record.Papers.push({ paperDetails, authorPosition, UploadFiles: uploadFiles });
         await record.save();
 
-        res.json({ success: true, message: 'Papers added successfully', papers: record.Papers });
+        res.status(200).json({ success: true, message: 'Papers added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -534,7 +534,7 @@ const addArticle = async (req, res) => {
         record.Articles.push({ articleDetails, UploadFiles: uploadFiles });
         await record.save();
 
-        res.json({ success: true, message: 'Article added successfully', articles: record.Articles });
+        res.status(200).json({ success: true, message: 'Article added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -542,17 +542,17 @@ const addArticle = async (req, res) => {
 const addResponsibility = async (req, res) => {
     try {
         const userId = req.params.userId;
-        const { responsibility, assignedBy, uploadFiles } = req.body;
+        const { Responsibility, Activities } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
             return res.status(404).json({ message: 'User record not found' });
         }
 
-        record.Responsibilities.push({ Responsibility: responsibility, assignedBy: assignedBy, UploadFiles: uploadFiles });
+        record.Responsibilities.push({ Responsibility, AssignedBy });
         await record.save();
 
-        res.json({ success: true, message: 'Responsibility added successfully', responsibilities: record.Responsibilities });
+        res.status(200).json({ success: true, message: 'Responsibility added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

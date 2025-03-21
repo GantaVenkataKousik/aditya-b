@@ -8,7 +8,7 @@ const othersSchema = new mongoose.Schema({
   }],
   Responsibilities: [{
     Responsibility: { type: String, },
-    assignedBy: { type: String, },
+    AssignedBy: { type: String, },
     UploadFiles: [{ Image: { type: String } }]
   }],
   Contribution: [{
