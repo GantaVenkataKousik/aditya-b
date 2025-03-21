@@ -229,13 +229,10 @@ router.get("/feedback/:userId", async (req, res) => {
 
 
 
-
-
 router.get("/raw", async (req, res) => {
     const userId = req.query.userId;
 
     try {
-        // Fetch classes for the logged-in teacher
         const data = await Class.find({ teacher: userId });
 
         res.status(200).json({ data });
