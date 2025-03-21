@@ -66,4 +66,51 @@ router.get('/teachers/:id', async (req, res) => {
   }
 });
 
+router.patch("/update-field/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { field, value } = req.body;
+
+    const allowedFields = [
+      'fullName', 'EmpID', 'designation', 'department',
+      'JoiningDate', 'UG', 'UGYear', 'PG', 'PGYear',
+      'Phd', 'PhdYear', 'OtherInstitution', 'OtherYear',
+      'Industry', 'TExp'
+    ];
+
+    if (!allowedFields.includes(field)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid field name'
+      });
+    }
+
+    const updateData = { [field]: value };
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Field updated successfully',
+      user
+    });
+  } catch (error) {
+    console.error("Error updating field:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 module.exports = router;
