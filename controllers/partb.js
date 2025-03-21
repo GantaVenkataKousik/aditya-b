@@ -542,7 +542,7 @@ const addArticle = async (req, res) => {
 const addResponsibility = async (req, res) => {
     try {
         const userId = req.params.userId;
-        const { Responsibility, Activities } = req.body;
+        const { Responsibility, AssignedBy } = req.body;
         const record = await Others.findOne({ userId });
 
         if (!record) {
