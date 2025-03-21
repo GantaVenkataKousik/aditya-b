@@ -11,7 +11,7 @@ const updateFeedback = async (req, res) => {
         const { id } = req.params;
         const { semester, courseName, numberOfStudents, feedbackPercentage, averagePercentage, selfAssessmentMarks } = req.body;
         const updatedFeedback = await Feedback.findByIdAndUpdate(id, { semester, courseName, numberOfStudents, feedbackPercentage, averagePercentage, selfAssessmentMarks }, { new: true });
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Feedback updated successfully',
             updatedFeedback
@@ -25,7 +25,7 @@ const deleteFeedback = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedFeedback = await Feedback.findByIdAndDelete(id);
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Feedback deleted successfully',
             deletedFeedback
@@ -45,7 +45,7 @@ const updateProctoring = async (req, res) => {
         const { id } = req.params;
         const { totalStudents, semesterBranchSec, eligibleStudents, passedStudents, averagePercentage, selfAssessmentMarks } = req.body;
         const updatedProctoring = await Proctoring.findByIdAndUpdate(id, { totalStudents, semesterBranchSec, eligibleStudents, passedStudents, averagePercentage, selfAssessmentMarks }, { new: true });
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Proctoring updated successfully',
             updatedProctoring
@@ -59,7 +59,7 @@ const deleteProctoring = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedProctoring = await Proctoring.findByIdAndDelete(id);
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Proctoring deleted successfully',
             deletedProctoring
@@ -75,7 +75,7 @@ const updateResearch = async (req, res) => {
         const { id } = req.params;
         const { title, description, publishedDate, userId, sciArticles, wosArticles, proposals, papers } = req.body;
         const updatedResearch = await Research.findByIdAndUpdate(id, { title, description, publishedDate, userId, sciArticles, wosArticles, proposals, papers }, { new: true });
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Research updated successfully',
             updatedResearch
@@ -89,7 +89,7 @@ const deleteResearch = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedResearch = await Research.findByIdAndDelete(id);
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Research deleted successfully',
             deletedResearch
@@ -107,7 +107,7 @@ const updateWorkshops = async (req, res) => {
         const { id } = req.params;
         const { title, description, category, date, startTime, endTime, venue, mode, organizedBy } = req.body;
         const updatedWorkshops = await Workshops.findByIdAndUpdate(id, { title, description, category, date, startTime, endTime, venue, mode, organizedBy }, { new: true });
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Workshops updated successfully',
             updatedWorkshops
@@ -121,7 +121,7 @@ const deleteWorkshops = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedWorkshops = await Workshops.findByIdAndDelete(id);
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Workshops deleted successfully',
             deletedWorkshops
@@ -140,7 +140,7 @@ const updateOutreach = async (req, res) => {
         const { id } = req.params;
         const { Activities } = req.body;
         const updatedOutreach = await Others.findByIdAndUpdate(id, { Activities }, { new: true });
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Outreach updated successfully',
             updatedOutreach
@@ -158,7 +158,7 @@ const deleteOutreach = async (req, res) => {
         const record = await Others.findById(id);
         record.Activities = [];
         await record.save();
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Outreach deleted successfully',
             record
@@ -191,7 +191,7 @@ const updateActivityByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Activity updated successfully',
             updatedActivity: record.Activities[indexNum]
@@ -257,7 +257,7 @@ const updateResponsibilityByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Responsibility updated successfully',
             updatedResponsibility: record.Responsibilities[indexNum]
@@ -297,7 +297,7 @@ const updateContributionByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Contribution updated successfully',
             updatedContribution: record.Contribution[index]
@@ -330,7 +330,7 @@ const updateAwardByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Award updated successfully',
             updatedAward: record.Awards[index]
@@ -358,7 +358,7 @@ const deleteAwardByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Award deleted successfully',
             updatedAwards: record.Awards
@@ -387,7 +387,7 @@ const deleteContributionByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Contribution deleted successfully',
             updatedContributions: record.Contribution
@@ -415,7 +415,7 @@ const deleteResponsibilityByIndex = async (req, res) => {
 
         await record.save();
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Responsibility deleted successfully',
             updatedResponsibilities: record.Responsibilities
@@ -435,7 +435,7 @@ const addActivity = async (req, res) => {
         record.Activities.push({ activityDetails, UploadFiles: uploadFiles });
         await record.save();
 
-        res.json({ success: true, message: 'Activity added successfully', activities: record.Activities });
+        res.status(200).json({ success: true, message: 'Activity added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -445,13 +445,13 @@ const addActivity = async (req, res) => {
 const addAward = async (req, res) => {
     try {
         const userId = req.params.userId;
-        const { awardName, awardedBy, level, description } = req.body;
+        const { Award, AwardedBy, Level, Description } = req.body;
         const record = await Others.findOne({ userId });
 
-        record.Awards.push({ Award: awardName, AwardedBy: awardedBy, Level: level, Description: description });
+        record.Awards.push({ Award, AwardedBy, Level, Description });
         await record.save();
 
-        res.json({ success: true, message: 'Award added successfully', awards: record.Awards });
+        res.status(200).json({ success: true, message: 'Award added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
