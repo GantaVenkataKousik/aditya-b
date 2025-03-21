@@ -11,16 +11,11 @@ router.post("/:userId", async (req, res) => {
       return res.status(400).json({ error: "User not found" });
     }
     const newWorkshop = new WorkshopData({
-      title: req.body.title,
-      Description: req.body.Description,
-      Category: req.body.Category,
-      Date: req.body.Date,
-      StartTime: req.body.StartTime,
-      EndTime: req.body.EndTime,
-      Venue: req.body.Venue,
-      Mode: req.body.Mode,
-      OrganizedBy: req.body.OrganizedBy,
-      User: user._id,
+      workshopTitle: req.body.workshopTitle,
+      date: req.body.date,
+      location: req.body.location,
+      organizer: req.body.organizer,
+      User: userId,
     });
     await newWorkshop.save();
 
