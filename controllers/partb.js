@@ -461,10 +461,10 @@ const addAward = async (req, res) => {
 const addContribution = async (req, res) => {
     try {
         const userId = req.params.userId;
-        const { contributionDetails, benefit, uploadFiles } = req.body;
+        const { contributionDetails, Benefit } = req.body;
         const record = await Others.findOne({ userId });
 
-        record.Contribution.push({ contributionDetails, Benefit: benefit, UploadFiles: uploadFiles });
+        record.Contribution.push({ contributionDetails, Benefit });
         await record.save();
 
         res.status(200).json({ success: true, message: 'Contribution added successfully' });
