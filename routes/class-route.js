@@ -255,9 +255,9 @@ router.post('/courses/add', async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
-router.get("/feedback/fdata", async (req, res) => {
+router.get("/feedback/fdata/:userId", async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const userId = req.params.userId;
         const data = await Feedback.find({ teacher: userId });
         res.status(200).json({ success: true, data });
     } catch (error) {
