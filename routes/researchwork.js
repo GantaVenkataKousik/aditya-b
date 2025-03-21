@@ -323,7 +323,7 @@ router.put("/sciarticles/:userId/:index", async (req, res) => {
 
 
 
-router.post("/wosarticles", async (req, res) => {
+router.post("/wosarticles/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     const { articleDetails, ISSN, authorPosition } = req.body;
