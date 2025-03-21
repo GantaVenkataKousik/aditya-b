@@ -526,7 +526,7 @@ router.put("/books/:userId/:index", async (req, res) => {
 
 router.post("/chapters/:userId", async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     const { chapterDetails, Publisher, ISBN, authorPosition } = req.body;
     let researchEntry = await ResearchData.findOne({ userId });
     if (!researchEntry) {
