@@ -46,9 +46,11 @@ router.get('/others-data', async (req, res) => {
     try {
         const userId = req.query.userId;
         const others = await Others.findOne({ userId });
+        const user = await User.findOne({ userId });
         res.status(200).json({
             success: true,
             others,
+            outreachmarks: user.outreachSelfAsses,
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

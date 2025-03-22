@@ -18,7 +18,6 @@ const feedbackSchema = new mongoose.Schema({
     },
     selfAssessmentMarks: {
         type: Number,
-
     },
     teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     imagePath: { type: String }

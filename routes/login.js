@@ -40,11 +40,25 @@ router.post('/login', async (req, res) => {
         res.cookie.token;
 
         // IMPORTANT: Return user ID along with token
+        const assesmentMarks = {
+            CouAvgPerMarks: user.CouAvgPerMarks,
+            CoufeedMarks: user.CoufeedMarks,
+            ProctoringMarks: user.ProctoringMarks,
+            SciMarks: user.SciMarks,
+            WosMarks: user.WosMarks,
+            ProposalMarks: user.ProposalMarks,
+            ResearchSelfAssesMarks: user.ResearchSelfAsses,
+            WorkSelfAssesMarks: user.WorkSelfAsses,
+            OutreachSelfAssesMarks: user.OutreachSelfAsses,
+            AddSelfAssesMarks: user.AddSelfAsses,
+            SpecialSelfAssesMarks: user.SpeacialSelfAsses,
+        };
         res.status(200).json({
             message: 'Login successful!',
             token,
             userId: user._id,
-            role: user.designation
+            role: user.designation,
+            assesmentMarks
         });
     } catch (error) {
         console.error('Error during login:', error);
