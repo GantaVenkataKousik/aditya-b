@@ -20,7 +20,6 @@ const {
     addPapers,
     addResponsibility
 } = require('../controllers/partb.js');
-const User = require('../models/user-model');
 const Others = require('../models/othersModel');
 // Activities Routes
 router.put('/activities/:id/:index', updateActivityByIndex);
@@ -47,11 +46,9 @@ router.get('/others-data', async (req, res) => {
     try {
         const userId = req.query.userId;
         const others = await Others.findOne({ userId });
-        const user = await User.findOne({ _id: userId });
         res.status(200).json({
             success: true,
             others,
-            outreachmarks: user.OutreachSelfAsses,
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
