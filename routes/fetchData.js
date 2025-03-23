@@ -7,6 +7,7 @@ const Class = require('../models/class-model'); // Adjust path as needed
 const Research = require('../models/research'); // Adjust path as needed
 const Feedback = require('../models/Feedback');
 const Workshop = require('../models/workshops');
+const Others = require('../models/othersModel');
 const mongoose = require('mongoose');
 
 // this is for profile.jsx
@@ -40,7 +41,7 @@ router.get('/faculty', async (req, res) => {
 
 
 router.get('/teachers/:id', async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params.id;
   try {
 
     const proctoringData = await Proctoring.find({ teacher: id });
@@ -48,6 +49,7 @@ router.get('/teachers/:id', async (req, res) => {
     const researchData = await Research.find({ userId: id });
     const feedbackData = await Feedback.find({ teacher: id });
     const workshopData = await Workshop.find({ User: id });
+    const othersData = await Others.find({ userId: id });
     // Log the results of each query
 
     res.json({
@@ -58,6 +60,7 @@ router.get('/teachers/:id', async (req, res) => {
         research: researchData,
         feedback: feedbackData,
         workshop: workshopData,
+        others: othersData,
       }
     });
   } catch (error) {
