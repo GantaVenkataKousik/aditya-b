@@ -50,7 +50,6 @@ router.get('/teachers/:id', async (req, res) => {
     const feedbackData = await Feedback.find({ teacher: id });
     const workshopData = await Workshop.find({ User: id });
     const othersData = await Others.find({ userId: id });
-    // Log the results of each query
 
     res.json({
       success: true,
