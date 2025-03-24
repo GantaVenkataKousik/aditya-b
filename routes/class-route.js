@@ -147,41 +147,47 @@ router.post('/feedback/:userId', async (req, res) => {
             feedbackpercent,
         } = req.body;
 
-        // Convert and validate all input fields
-        const feedbackPercentageNum = typeof feedbackpercent === 'string'
-            ? parseFloat(feedbackpercent.replace(/[^\d.-]/g, ''))
-            : parseFloat(feedbackpercent);
+        let feedbackPercentageNum;
+        if (typeof feedbackpercent === 'string') {
+            const cleanedValue = feedbackpercent.replace(/[^\d.]/g, '');
+            feedbackPercentageNum = cleanedValue ? parseFloat(cleanedValue) : 0;
+        } else if (typeof feedbackpercent === 'number') {
+            feedbackPercentageNum = feedbackpercent;
+        } else {
+            feedbackPercentageNum = 0;
+        }
 
-        const numberOfStudentsNum = typeof numberOfStudents === 'string'
-            ? parseInt(numberOfStudents.replace(/[^\d]/g, ''))
-            : parseInt(numberOfStudents);
+        let numberOfStudentsNum;
+        if (typeof numberOfStudents === 'string') {
+            const cleanedValue = numberOfStudents.replace(/\D/g, '');
+            numberOfStudentsNum = cleanedValue ? parseInt(cleanedValue) : 0;
+        } else if (typeof numberOfStudents === 'number') {
+            numberOfStudentsNum = Math.floor(numberOfStudents);
+        } else {
+            numberOfStudentsNum = 0;
+        }
 
         const cleanedSemester = typeof semester === 'string'
             ? semester.trim()
-            : String(semester);
+            : String(semester || '');
 
         const cleanedCourseName = typeof courseName === 'string'
             ? courseName.trim()
-            : String(courseName);
+            : String(courseName || '');
 
-        // Validate numeric values
-        if (isNaN(feedbackPercentageNum)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid feedback percentage value",
-                error: "Feedback percentage must be a valid number"
-            });
-        }
+        // Ensure values are within valid ranges
+        feedbackPercentageNum = Math.min(100, Math.max(0, feedbackPercentageNum));
+        numberOfStudentsNum = Math.max(0, numberOfStudentsNum);
 
-        if (isNaN(numberOfStudentsNum)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid number of students value",
-                error: "Number of students must be a valid number"
-            });
-        }
+        // Create sanitized data object
+        const sanitizedData = {
+            courseName: cleanedCourseName,
+            semester: cleanedSemester,
+            numberOfStudents: numberOfStudentsNum,
+            feedbackPercentage: feedbackPercentageNum
+        };
 
-        // Validate string values
+        // Validate required fields
         if (!cleanedCourseName) {
             return res.status(400).json({
                 success: false,
@@ -197,14 +203,6 @@ router.post('/feedback/:userId', async (req, res) => {
                 error: "Semester cannot be empty"
             });
         }
-
-        // Prepare sanitized data
-        const sanitizedData = {
-            courseName: cleanedCourseName,
-            semester: cleanedSemester,
-            numberOfStudents: Math.max(0, numberOfStudentsNum), // Ensure non-negative
-            feedbackPercentage: Math.min(100, Math.max(0, feedbackPercentageNum)) // Clamp between 0-100
-        };
 
         const feedbacks = await Feedback.find({ teacher: user._id });
 
