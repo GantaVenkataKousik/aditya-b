@@ -310,7 +310,7 @@ const updateContributionByIndex = async (req, res) => {
 const updateAwardByIndex = async (req, res) => {
     try {
         const { id, index } = req.params;
-        const { Award, IssuingOrg, UploadFiles } = req.body;
+        const { Award, AwardedBy, Description, level } = req.body;
 
         // FIXED: Using userId instead of _id
         const record = await Others.findOne({ userId: id });
@@ -323,7 +323,9 @@ const updateAwardByIndex = async (req, res) => {
         }
 
         record.Awards[index].Award = Award;
-        record.Awards[index].IssuingOrg = IssuingOrg;
+        record.Awards[index].AwardedBy = AwardedBy;
+        record.Awards[index].Level = Level;
+        record.Awards[index].Description = Description;
         if (UploadFiles) {
             record.Awards[index].UploadFiles = UploadFiles;
         }
