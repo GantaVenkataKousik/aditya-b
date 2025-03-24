@@ -146,16 +146,26 @@ router.post('/feedback/:userId', async (req, res) => {
             numberOfStudents,
             feedbackpercent,
         } = req.body;
+
+        // Convert string values to numbers
+        const feedbackPercentageNum = parseFloat(feedbackpercent);
+        const numberOfStudentsNum = parseInt(numberOfStudents);
+
         // Fetch all feedback for the user
         const feedbacks = await Feedback.find({ teacher: user._id });
-        const totalFeedbackPercentage = feedbacks.reduce((acc, fb) => acc + fb.feedbackPercentage, 0);
+        const totalFeedbackPercentage = feedbacks.reduce((acc, fb) => acc + parseFloat(fb.feedbackPercentage || 0), 0);
 
-        const averageFeedbackPercentage = feedbacks.length > 0 ? (totalFeedbackPercentage / feedbacks.length).toFixed(2) : 0;
+        // Ensure we're working with numbers throughout the calculation
+        const averageFeedbackPercentage = feedbacks.length > 0
+            ? (totalFeedbackPercentage / feedbacks.length).toFixed(2)
+            : 0;
 
         let totalMarks = 0;
-        if (averageFeedbackPercentage >= 95) {
+        const avgPercentNum = parseFloat(averageFeedbackPercentage);
+
+        if (avgPercentNum >= 95) {
             totalMarks += 20;
-        } else if (averageFeedbackPercentage >= 85) {
+        } else if (avgPercentNum >= 85) {
             totalMarks += 15;
         } else {
             totalMarks += 10;
@@ -163,26 +173,33 @@ router.post('/feedback/:userId', async (req, res) => {
 
         // Update the User model with the computed totalMarks
         user.feedSelfAsses = totalMarks;
-        await user.save(); // Save the updated user document
+        await user.save();
 
-        // Create a new feedback document
+        // Create a new feedback document with explicitly converted number values
         const newFeedback = new Feedback({
             courseName,
             semester,
-            numberOfStudents,
-            feedbackPercentage: feedbackpercent,
-            averagePercentage: parseFloat(averageFeedbackPercentage), // Ensure it's a number
-            selfAssessmentMarks: totalMarks,
+            numberOfStudents: numberOfStudentsNum,
+            feedbackPercentage: feedbackPercentageNum,
+            averagePercentage: avgPercentNum,
+            selfAssessmentMarks: parseInt(totalMarks),
             teacher: user._id
         });
 
-        // Save the new feedback to the database
-        const savedFeedback = await newFeedback.save();
+        await newFeedback.save();
+        res.status(201).json({
+            success: true,
+            message: "Feedback added successfully",
+            feedback: newFeedback
+        });
 
-        res.status(200).json({ success: true, message: 'Feedback added successfully', data: savedFeedback, averageFeedbackPercentage, updatedUserMarks: user.courseAvgPerMarks });
     } catch (error) {
-        console.error('Error saving feedback:', error);
-        res.status(400).json({ error: error.message });
+        console.error('Error in feedback route:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error adding feedback",
+            error: error.message
+        });
     }
 });
 
