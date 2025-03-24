@@ -140,118 +140,27 @@ router.post('/feedback/:userId', async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
+        // Destructure only the fields that match the schema
         const {
             courseName,
             semester,
             numberOfStudents,
-            feedbackpercent,
+            feedbackPercentage,
+            averagePercentage,
+            selfAssessmentMarks
         } = req.body;
 
-        let feedbackPercentageNum;
-        if (typeof feedbackpercent === 'string') {
-            const cleanedValue = feedbackpercent.replace(/[^\d.]/g, '');
-            feedbackPercentageNum = cleanedValue ? parseFloat(cleanedValue) : 0;
-        } else if (typeof feedbackpercent === 'number') {
-            feedbackPercentageNum = feedbackpercent;
-        } else {
-            feedbackPercentageNum = 0;
-        }
-
-        let numberOfStudentsNum;
-        if (typeof numberOfStudents === 'string') {
-            const cleanedValue = numberOfStudents.replace(/\D/g, '');
-            numberOfStudentsNum = cleanedValue ? parseInt(cleanedValue) : 0;
-        } else if (typeof numberOfStudents === 'number') {
-            numberOfStudentsNum = Math.floor(numberOfStudents);
-        } else {
-            numberOfStudentsNum = 0;
-        }
-
-        const cleanedSemester = typeof semester === 'string'
-            ? semester.trim()
-            : String(semester || '');
-
-        const cleanedCourseName = typeof courseName === 'string'
-            ? courseName.trim()
-            : String(courseName || '');
-
-        // Ensure values are within valid ranges
-        feedbackPercentageNum = Math.min(100, Math.max(0, feedbackPercentageNum));
-        numberOfStudentsNum = Math.max(0, numberOfStudentsNum);
-
-        // Create sanitized data object
-        const sanitizedData = {
-            courseName: cleanedCourseName,
-            semester: cleanedSemester,
-            numberOfStudents: numberOfStudentsNum,
-            feedbackPercentage: feedbackPercentageNum
-        };
-
-        // Validate required fields
-        if (!cleanedCourseName) {
-            return res.status(400).json({
-                success: false,
-                message: "Course name is required",
-                error: "Course name cannot be empty"
-            });
-        }
-
-        if (!cleanedSemester) {
-            return res.status(400).json({
-                success: false,
-                message: "Semester is required",
-                error: "Semester cannot be empty"
-            });
-        }
-
-        const feedbacks = await Feedback.find({ teacher: user._id });
-
-        const totalFeedbackPercentage = feedbacks.reduce((acc, fb) => {
-            const fbPercent = parseFloat(fb.feedbackPercentage);
-            return acc + (isNaN(fbPercent) ? 0 : fbPercent);
-        }, 0);
-
-        // Calculate average with validation
-        const averageFeedbackPercentage = feedbacks.length > 0
-            ? (totalFeedbackPercentage / feedbacks.length).toFixed(2)
-            : "0.00";
-
-        // Convert average to number with validation
-        const avgPercentNum = parseFloat(averageFeedbackPercentage);
-        if (isNaN(avgPercentNum)) {
-            return res.status(400).json({
-                success: false,
-                message: "Error calculating average",
-                error: "Invalid average calculation"
-            });
-        }
-
-        // Calculate marks
-        let totalMarks = 0;
-        if (avgPercentNum >= 95) {
-            totalMarks = 20;
-        } else if (avgPercentNum >= 85) {
-            totalMarks = 15;
-        } else {
-            totalMarks = 10;
-        }
-
-        // Validate final values before saving
+        // Create feedback document matching schema exactly
         const feedbackData = {
-            courseName: sanitizedData.courseName,
-            semester: sanitizedData.semester,
-            numberOfStudents: sanitizedData.numberOfStudents,
-            feedbackPercentage: sanitizedData.feedbackPercentage,
-            averagePercentage: Math.min(100, Math.max(0, avgPercentNum)), // Clamp between 0-100
-            selfAssessmentMarks: totalMarks,
+            courseName,
+            semester,
+            numberOfStudents: Number(numberOfStudents),
+            feedbackPercentage: Number(feedbackPercentage),
+            averagePercentage: Number(averagePercentage),
+            selfAssessmentMarks: Number(selfAssessmentMarks),
             teacher: user._id
         };
 
-        // Update user's self assessment marks
-        user.feedSelfAsses = totalMarks;
-        await user.save();
-
-        // Create and save new feedback
         const newFeedback = new Feedback(feedbackData);
         await newFeedback.save();
 
