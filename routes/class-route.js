@@ -147,46 +147,116 @@ router.post('/feedback/:userId', async (req, res) => {
             feedbackpercent,
         } = req.body;
 
-        // Convert string values to numbers
-        const feedbackPercentageNum = parseFloat(feedbackpercent);
-        const numberOfStudentsNum = parseInt(numberOfStudents);
+        // Convert and validate all input fields
+        const feedbackPercentageNum = typeof feedbackpercent === 'string'
+            ? parseFloat(feedbackpercent.replace(/[^\d.-]/g, ''))
+            : parseFloat(feedbackpercent);
 
-        // Fetch all feedback for the user
-        const feedbacks = await Feedback.find({ teacher: user._id });
-        const totalFeedbackPercentage = feedbacks.reduce((acc, fb) => acc + parseFloat(fb.feedbackPercentage || 0), 0);
+        const numberOfStudentsNum = typeof numberOfStudents === 'string'
+            ? parseInt(numberOfStudents.replace(/[^\d]/g, ''))
+            : parseInt(numberOfStudents);
 
-        // Ensure we're working with numbers throughout the calculation
-        const averageFeedbackPercentage = feedbacks.length > 0
-            ? (totalFeedbackPercentage / feedbacks.length).toFixed(2)
-            : 0;
+        const cleanedSemester = typeof semester === 'string'
+            ? semester.trim()
+            : String(semester);
 
-        let totalMarks = 0;
-        const avgPercentNum = parseFloat(averageFeedbackPercentage);
+        const cleanedCourseName = typeof courseName === 'string'
+            ? courseName.trim()
+            : String(courseName);
 
-        if (avgPercentNum >= 95) {
-            totalMarks += 20;
-        } else if (avgPercentNum >= 85) {
-            totalMarks += 15;
-        } else {
-            totalMarks += 10;
+        // Validate numeric values
+        if (isNaN(feedbackPercentageNum)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid feedback percentage value",
+                error: "Feedback percentage must be a valid number"
+            });
         }
 
-        // Update the User model with the computed totalMarks
+        if (isNaN(numberOfStudentsNum)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid number of students value",
+                error: "Number of students must be a valid number"
+            });
+        }
+
+        // Validate string values
+        if (!cleanedCourseName) {
+            return res.status(400).json({
+                success: false,
+                message: "Course name is required",
+                error: "Course name cannot be empty"
+            });
+        }
+
+        if (!cleanedSemester) {
+            return res.status(400).json({
+                success: false,
+                message: "Semester is required",
+                error: "Semester cannot be empty"
+            });
+        }
+
+        // Prepare sanitized data
+        const sanitizedData = {
+            courseName: cleanedCourseName,
+            semester: cleanedSemester,
+            numberOfStudents: Math.max(0, numberOfStudentsNum), // Ensure non-negative
+            feedbackPercentage: Math.min(100, Math.max(0, feedbackPercentageNum)) // Clamp between 0-100
+        };
+
+        const feedbacks = await Feedback.find({ teacher: user._id });
+
+        const totalFeedbackPercentage = feedbacks.reduce((acc, fb) => {
+            const fbPercent = parseFloat(fb.feedbackPercentage);
+            return acc + (isNaN(fbPercent) ? 0 : fbPercent);
+        }, 0);
+
+        // Calculate average with validation
+        const averageFeedbackPercentage = feedbacks.length > 0
+            ? (totalFeedbackPercentage / feedbacks.length).toFixed(2)
+            : "0.00";
+
+        // Convert average to number with validation
+        const avgPercentNum = parseFloat(averageFeedbackPercentage);
+        if (isNaN(avgPercentNum)) {
+            return res.status(400).json({
+                success: false,
+                message: "Error calculating average",
+                error: "Invalid average calculation"
+            });
+        }
+
+        // Calculate marks
+        let totalMarks = 0;
+        if (avgPercentNum >= 95) {
+            totalMarks = 20;
+        } else if (avgPercentNum >= 85) {
+            totalMarks = 15;
+        } else {
+            totalMarks = 10;
+        }
+
+        // Validate final values before saving
+        const feedbackData = {
+            courseName: sanitizedData.courseName,
+            semester: sanitizedData.semester,
+            numberOfStudents: sanitizedData.numberOfStudents,
+            feedbackPercentage: sanitizedData.feedbackPercentage,
+            averagePercentage: Math.min(100, Math.max(0, avgPercentNum)), // Clamp between 0-100
+            selfAssessmentMarks: totalMarks,
+            teacher: user._id
+        };
+
+        // Update user's self assessment marks
         user.feedSelfAsses = totalMarks;
         await user.save();
 
-        // Create a new feedback document with explicitly converted number values
-        const newFeedback = new Feedback({
-            courseName,
-            semester,
-            numberOfStudents: numberOfStudentsNum,
-            feedbackPercentage: feedbackPercentageNum,
-            averagePercentage: avgPercentNum,
-            selfAssessmentMarks: parseInt(totalMarks),
-            teacher: user._id
-        });
-
+        // Create and save new feedback
+        const newFeedback = new Feedback(feedbackData);
         await newFeedback.save();
+
         res.status(201).json({
             success: true,
             message: "Feedback added successfully",
