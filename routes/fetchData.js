@@ -41,9 +41,9 @@ router.get('/faculty', async (req, res) => {
 
 
 router.get('/teachers/:id', async (req, res) => {
-  const { id } = req.params.id;
+  const id = req.params.id;
+  console.log(id);
   try {
-
     const proctoringData = await Proctoring.find({ teacher: id });
     const classData = await Class.find({ teacher: id });
     const researchData = await Research.find({ userId: id });
