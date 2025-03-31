@@ -3,7 +3,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt'); // For password comparison
 const jwt = require('jsonwebtoken'); // For token generation
 const User = require('../models/user-model'); // Adjust the path to your User model
+const LoginTracking = require('../models/login-tracking-model'); // Add this import
 const { generatetoken } = require('../utils/generatetoken'); // Adjust based on your token generation logic
+const { getLoginsByDay } = require('../controllers/login-tracking-controller');
 
 router.post('/login', async (req, res) => {
     try {
@@ -20,7 +22,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid email or password.' });
         }
 
-        // Validate password
+        // Validate passwordy 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ success: false, message: 'Invalid email or password.' });
@@ -28,7 +30,6 @@ router.post('/login', async (req, res) => {
 
         // Generate token
         const token = generatetoken(user);
-
 
         // Set cookie with token
         res.cookie('token', token, {
@@ -38,6 +39,15 @@ router.post('/login', async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years in milliseconds
         });
         res.cookie.token;
+
+        // Track login in the database
+        await LoginTracking.create({
+            userId: user._id,
+            designation: user.designation,
+            date: new Date(),
+            ipAddress: req.ip || req.connection.remoteAddress,
+            userAgent: req.headers['user-agent']
+        });
 
         // IMPORTANT: Return user ID along with token
         const assesmentMarks = {
@@ -66,5 +76,8 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error. Please try again later.' });
     }
 });
+
+// Route for login statistics by hour with optional date and designation filters
+router.get('/login-statistics', getLoginsByDay);
 
 module.exports = router;
