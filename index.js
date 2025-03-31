@@ -33,10 +33,9 @@ const others = require(path.join(__dirname, "routes", "otherRoute"));
 const corsOptions = {
     origin: [
         'http://localhost:5173',
-        'https://aditya-b.onrender.com/',
+        'https://aditya-b.onrender.com',
         'https://aditya-f.vercel.app',
-        'https://aditya-frontend.vercel.app/',
-        '*'
+        'https://aditya-frontend.vercel.app'
     ],
     credentials: true,
     exposedHeaders: ['Authorization']
