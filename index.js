@@ -73,7 +73,9 @@ app.get("/logout", (req, res) => {
     res.clearCookie("token");
     return res.status(200).json({ message: "Logout successful" });
 });
-
+app.get("/", (req, res) => {
+    res.send("Welcome to Aditya backend");
+});
 
 // Start Server
 const PORT = process.env.PORT || 5001;
