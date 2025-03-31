@@ -1,3 +1,5 @@
+const LoginTracking = require('../models/login-tracking-model');
+
 // Get logins by designation for a specific day
 exports.getLoginsByDay = async (req, res) => {
     try {
