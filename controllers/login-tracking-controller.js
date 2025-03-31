@@ -26,7 +26,69 @@ exports.getLoginsByDay = async (req, res) => {
             matchCondition.designation = req.query.designation;
         }
 
-        // Aggregate logins by designation for the target date
+        // Check if hourly breakdown is requested
+        if (req.query.hourly === 'true') {
+            // Aggregate logins by hour and designation
+            const hourlyData = await LoginTracking.aggregate([
+                {
+                    $match: matchCondition
+                },
+                {
+                    $addFields: {
+                        hour: { $hour: "$date" }  // Extract hour from date
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            hour: "$hour",
+                            designation: "$designation"
+                        },
+                        count: { $sum: 1 },
+                        totalLogins: { $sum: "$loginCount" }
+                    }
+                },
+                {
+                    $sort: { "_id.hour": 1, "_id.designation": 1 }
+                }
+            ]);
+
+            // Format data for chart rendering
+            const hours = Array.from({ length: 24 }, (_, i) => i);
+            const designations = [...new Set(hourlyData.map(item => item._id.designation))];
+
+            // Create datasets object
+            const datasets = {};
+
+            // Initialize with zeros
+            designations.forEach(designation => {
+                datasets[designation] = new Array(24).fill(0);
+            });
+
+            // Fill in actual data
+            hourlyData.forEach(item => {
+                const { hour, designation } = item._id;
+                datasets[designation][hour] = item.totalLogins;
+            });
+
+            // Get totals
+            const totalLogins = hourlyData.reduce((sum, item) => sum + item.totalLogins, 0);
+            const totalCount = hourlyData.reduce((sum, item) => sum + item.count, 0);
+
+            return res.status(200).json({
+                success: true,
+                date: targetDate.toISOString().split('T')[0],
+                totalLogins,
+                totalCount,
+                hourlyData: {
+                    labels: hours.map(h => `${h}:00`),
+                    datasets
+                }
+            });
+        }
+
+        // Original code for designation-based grouping
+        // ... existing designation aggregation code ...
         const loginData = await LoginTracking.aggregate([
             {
                 $match: matchCondition
