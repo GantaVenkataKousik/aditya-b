@@ -11,19 +11,19 @@ router.post('/login', async (req, res) => {
 
         // Validate input fields
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required.' });
+            return res.status(400).json({ success: false, message: 'Email and password are required.' });
         }
 
         // Check if user exists
         const user = await User.findOne({ email: email });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password.' });
+            return res.status(401).json({ success: false, message: 'Invalid email or password.' });
         }
 
         // Validate password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid email or password.' });
+            return res.status(401).json({ success: false, message: 'Invalid email or password.' });
         }
 
         // Generate token
@@ -54,6 +54,7 @@ router.post('/login', async (req, res) => {
             SpecialSelfAssesMarks: user.SpeacialSelfAsses,
         };
         res.status(200).json({
+            success: true,
             message: 'Login successful!',
             token,
             userId: user._id,
@@ -62,7 +63,7 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         console.error('Error during login:', error);
-        res.status(500).json({ message: 'Server error. Please try again later.' });
+        res.status(500).json({ success: false, message: 'Server error. Please try again later.' });
     }
 });
 

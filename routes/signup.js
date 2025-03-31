@@ -7,9 +7,9 @@ const { generatetoken } = require('../utils/generatetoken'); // Adjust based on 
 
 router.post('/register', async (req, res) => {
     try {
-        const { fullname, email, password, designation, department,type } = req.body;
+        const { fullname, email, password, designation, department, type } = req.body;
 
-        if (!fullname || !email || !password || !designation ) {
+        if (!fullname || !email || !password || !designation) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
 
@@ -36,18 +36,18 @@ router.post('/register', async (req, res) => {
 
         // Set cookie with token
         res.cookie('token', token);
-        
+
 
         // Set token in response headers
         res.setHeader('Authorization', `Bearer ${token}`);
-       res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, { httpOnly: true });
 
         // Respond with success message
-        return res.status(201).json({ message: 'User registered successfully!',token });
+        return res.status(201).json({ success: true, message: 'User registered successfully!', token });
 
     } catch (error) {
         console.error('Error during user registration:', error);
-        return res.status(500).json({ message: 'Server error. Please try again later.' });
+        return res.status(500).json({ success: false, message: 'Server error. Please try again later.' });
     }
 });
 
