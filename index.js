@@ -35,6 +35,7 @@ const corsOptions = {
         'http://localhost:5173',
         'https://aditya-b.onrender.com/',
         'https://aditya-f.vercel.app',
+        'https://aditya-frontend.vercel.app/',
         '*'
     ],
     credentials: true,
