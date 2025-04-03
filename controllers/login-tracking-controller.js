@@ -1,3 +1,4 @@
+const User = require('../models/user-model');
 const LoginTracking = require('../models/login-tracking-model');
 
 // Get logins by designation for a specific day
@@ -25,6 +26,26 @@ exports.getLoginsByDay = async (req, res) => {
         if (req.query.designation) {
             matchCondition.designation = req.query.designation;
         }
+
+        // NEW CODE: Fetch unique user IDs from login tracking for this time period
+        const uniqueUserIds = await LoginTracking.distinct("userId", matchCondition);
+
+        // NEW CODE: Fetch user details for these users
+        const usersData = await User.find(
+            { _id: { $in: uniqueUserIds } },
+            {
+                fullName: 1,
+                email: 1,
+                EmpID: 1,
+                designation: 1,
+                department: 1,
+                JoiningDate: 1,
+                Qualification: 1,
+                UG: 1,
+                PG: 1,
+                Phd: 1
+            }
+        ).lean();
 
         // Check if hourly breakdown is requested
         if (req.query.hourly === 'true') {
@@ -75,6 +96,7 @@ exports.getLoginsByDay = async (req, res) => {
             const totalLogins = hourlyData.reduce((sum, item) => sum + item.totalLogins, 0);
             const totalCount = hourlyData.reduce((sum, item) => sum + item.count, 0);
 
+            // NEW CODE: Add users data to the response
             return res.status(200).json({
                 success: true,
                 date: targetDate.toISOString().split('T')[0],
@@ -83,12 +105,18 @@ exports.getLoginsByDay = async (req, res) => {
                 hourlyData: {
                     labels: hours.map(h => `${h}:00`),
                     datasets
-                }
+                },
+                // Add the users data here
+                usersData: usersData.map(user => ({
+                    ...user,
+                    EmpID: user.EmpID || 'N/A',
+                    JoiningDate: user.JoiningDate || 'N/A',
+                    Qualification: user.Qualification || 'N/A'
+                }))
             });
         }
 
         // Original code for designation-based grouping
-        // ... existing designation aggregation code ...
         const loginData = await LoginTracking.aggregate([
             {
                 $match: matchCondition
@@ -126,13 +154,21 @@ exports.getLoginsByDay = async (req, res) => {
             }
         };
 
+        // NEW CODE: Add users data to the response
         res.status(200).json({
             success: true,
             date: targetDate.toISOString().split('T')[0],
             totalLogins,
             totalCount,
             byDesignation: loginData,
-            chartData
+            chartData,
+            // Add the users data here
+            usersData: usersData.map(user => ({
+                ...user,
+                EmpID: user.EmpID || 'N/A',
+                JoiningDate: user.JoiningDate || 'N/A',
+                Qualification: user.Qualification || 'N/A'
+            }))
         });
     } catch (error) {
         console.error('Error fetching logins by day:', error);
