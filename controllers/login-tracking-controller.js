@@ -12,36 +12,45 @@ exports.getLoginsByDay = async (req, res) => {
         console.log("Actual current time (UTC):", actualNow);
         console.log("Actual current time (Local):", actualNow.toString());
 
-        // Generate current date in IST timezone
-        const nowUTC = new Date();
-        const istTime = new Date(nowUTC.getTime() + (5.5 * 60 * 60 * 1000));
-        const istDateString = istTime.toISOString().split('T')[0];
-        console.log('Current IST date:', istDateString);
+        // Fix the query date range calculation
+        let targetDate;
 
-        // Create date object for the IST date
-        const targetDate = new Date(istDateString);
+        if (req.query.date) {
+            // If date is provided in the request, use it
+            targetDate = new Date(req.query.date);
+        } else {
+            // Get current time in UTC
+            const nowUTC = new Date();
 
-        // For IST date of April 4th, we need:
-        // Start: April 3rd 18:30:00 UTC (00:00:00 April 4th IST)
-        // End: April 4th 18:29:59 UTC (23:59:59 April 4th IST)
+            // Convert to IST by adding 5 hours and 30 minutes
+            const istTime = new Date(nowUTC.getTime() + (5.5 * 60 * 60 * 1000));
 
-        // Calculate query start (previous day 18:30:00 UTC = 00:00:00 IST)
+            // Get just the date part in IST
+            const istDateString = istTime.toISOString().split('T')[0];
+            console.log('Current IST date:', istDateString);
+
+            // Create a date object for that IST date
+            targetDate = new Date(istDateString);
+        }
+
+        // Calculate query start time - set to beginning of the TARGET DATE in UTC (not IST)
         const startDate = new Date(targetDate);
-        startDate.setUTCHours(0, 0, 0, 0); // Midnight UTC
-        startDate.setTime(startDate.getTime() - (5.5 * 60 * 60 * 1000)); // Go back 5.5 hours
+        startDate.setUTCHours(0, 0, 0, 0); // Start at midnight UTC of target date
 
-        // Calculate query end (current day 18:29:59 UTC = 23:59:59 IST)
+        // Calculate query end time - set to end of the TARGET DATE in UTC (not IST)
         const endDate = new Date(targetDate);
-        endDate.setUTCHours(23, 59, 59, 999); // End of day UTC
-        endDate.setTime(endDate.getTime() - (5.5 * 60 * 60 * 1000)); // Go back 5.5 hours
+        endDate.setUTCHours(23, 59, 59, 999); // End at 23:59:59.999 UTC of target date
 
-        console.log('Target date (IST):', targetDate.toISOString());
+        console.log('Target date:', targetDate.toISOString());
         console.log('Query start (UTC):', startDate.toISOString());
         console.log('Query end (UTC):', endDate.toISOString());
 
-        // Set up match condition with correct date range for UTC values
+        // Build match condition with the proper UTC time range
         const matchCondition = {
-            date: { $gte: startDate, $lte: endDate }
+            date: {
+                $gte: startDate,
+                $lte: endDate
+            }
         };
 
         // Add designation filter if provided

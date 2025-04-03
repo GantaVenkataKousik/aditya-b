@@ -40,11 +40,14 @@ router.post('/login', async (req, res) => {
         });
         res.cookie.token;
 
-        // Track login in the database
+        // Track login in the database with IST date
+        const utcDate = new Date();
+        const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000)); // Convert to IST
+
         await LoginTracking.create({
             userId: user._id,
             designation: user.designation,
-            date: new Date(),
+            date: istDate,  // Store date in IST
             ipAddress: req.ip || req.connection.remoteAddress,
             userAgent: req.headers['user-agent']
         });
