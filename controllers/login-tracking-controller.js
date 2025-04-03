@@ -4,39 +4,44 @@ const LoginTracking = require('../models/login-tracking-model');
 // Get logins by designation for a specific day
 exports.getLoginsByDay = async (req, res) => {
     try {
-        // Set up date filter - use specified date or adjust for Indian timezone
-        let targetDate;
+        console.log("=== LOGIN STATISTICS DEBUG ===");
+        console.log("Query params:", req.query);
 
-        if (req.query.date) {
-            // If date is provided in the request, use it
-            targetDate = new Date(req.query.date);
-        } else {
-            // Get current date in Indian Standard Time (UTC+5:30)
-            const now = new Date();
-            // Get IST date string (YYYY-MM-DD format)
-            const istOffset = 5.5 * 60 * 60 * 1000; // 5 hours and 30 minutes in milliseconds
-            const istDate = new Date(now.getTime() + istOffset);
-            const istDateString = istDate.toISOString().split('T')[0];
-            targetDate = new Date(istDateString);
-        }
+        // Current real time
+        const actualNow = new Date();
+        console.log("Actual current time (UTC):", actualNow);
+        console.log("Actual current time (Local):", actualNow.toString());
 
-        // Set start and end time for the target date (full 24 hours in IST)
+        // Generate current date in IST timezone
+        const nowUTC = new Date();
+        const istTime = new Date(nowUTC.getTime() + (5.5 * 60 * 60 * 1000));
+        const istDateString = istTime.toISOString().split('T')[0];
+        console.log('Current IST date:', istDateString);
+
+        // Create date object for the IST date
+        const targetDate = new Date(istDateString);
+
+        // For IST date of April 4th, we need:
+        // Start: April 3rd 18:30:00 UTC (00:00:00 April 4th IST)
+        // End: April 4th 18:29:59 UTC (23:59:59 April 4th IST)
+
+        // Calculate query start (previous day 18:30:00 UTC = 00:00:00 IST)
         const startDate = new Date(targetDate);
-        startDate.setHours(0, 0, 0, 0);
+        startDate.setUTCHours(0, 0, 0, 0); // Midnight UTC
+        startDate.setTime(startDate.getTime() - (5.5 * 60 * 60 * 1000)); // Go back 5.5 hours
 
+        // Calculate query end (current day 18:29:59 UTC = 23:59:59 IST)
         const endDate = new Date(targetDate);
-        endDate.setHours(23, 59, 59, 999);
+        endDate.setUTCHours(23, 59, 59, 999); // End of day UTC
+        endDate.setTime(endDate.getTime() - (5.5 * 60 * 60 * 1000)); // Go back 5.5 hours
 
-        console.log('Target date (IST):', targetDate);
-        console.log('Start date for query:', startDate);
-        console.log('End date for query:', endDate);
+        console.log('Target date (IST):', targetDate.toISOString());
+        console.log('Query start (UTC):', startDate.toISOString());
+        console.log('Query end (UTC):', endDate.toISOString());
 
-        // Build match condition
+        // Set up match condition with correct date range for UTC values
         const matchCondition = {
-            date: {
-                $gte: startDate,
-                $lte: endDate
-            }
+            date: { $gte: startDate, $lte: endDate }
         };
 
         // Add designation filter if provided
@@ -154,7 +159,7 @@ exports.getLoginsByDay = async (req, res) => {
             // Return with enriched user data
             return res.status(200).json({
                 success: true,
-                date: targetDate.toISOString().split('T')[0],
+                date: new Date(startDate).toISOString().split('T')[0],
                 totalLogins,
                 totalCount,
                 hourlyData: {
@@ -207,7 +212,7 @@ exports.getLoginsByDay = async (req, res) => {
         // Return with enriched user data
         res.status(200).json({
             success: true,
-            date: targetDate.toISOString().split('T')[0],
+            date: new Date(startDate).toISOString().split('T')[0],
             totalLogins,
             totalCount,
             byDesignation: loginData,
