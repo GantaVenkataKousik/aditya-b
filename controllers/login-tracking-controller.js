@@ -4,15 +4,32 @@ const LoginTracking = require('../models/login-tracking-model');
 // Get logins by designation for a specific day
 exports.getLoginsByDay = async (req, res) => {
     try {
-        // Set up date filter - use specified date or default to today
-        const targetDate = req.query.date ? new Date(req.query.date) : new Date();
+        // Set up date filter - use specified date or adjust for Indian timezone
+        let targetDate;
 
-        // Set start and end time for the target date (full 24 hours)
+        if (req.query.date) {
+            // If date is provided in the request, use it
+            targetDate = new Date(req.query.date);
+        } else {
+            // Get current date in Indian Standard Time (UTC+5:30)
+            const now = new Date();
+            // Get IST date string (YYYY-MM-DD format)
+            const istOffset = 5.5 * 60 * 60 * 1000; // 5 hours and 30 minutes in milliseconds
+            const istDate = new Date(now.getTime() + istOffset);
+            const istDateString = istDate.toISOString().split('T')[0];
+            targetDate = new Date(istDateString);
+        }
+
+        // Set start and end time for the target date (full 24 hours in IST)
         const startDate = new Date(targetDate);
         startDate.setHours(0, 0, 0, 0);
 
         const endDate = new Date(targetDate);
         endDate.setHours(23, 59, 59, 999);
+
+        console.log('Target date (IST):', targetDate);
+        console.log('Start date for query:', startDate);
+        console.log('End date for query:', endDate);
 
         // Build match condition
         const matchCondition = {
