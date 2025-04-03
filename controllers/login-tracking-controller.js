@@ -30,6 +30,29 @@ exports.getLoginsByDay = async (req, res) => {
         // NEW CODE: Fetch unique user IDs from login tracking for this time period
         const uniqueUserIds = await LoginTracking.distinct("userId", matchCondition);
 
+        // NEW CODE: Get login counts for each user
+        const userLoginCounts = await LoginTracking.aggregate([
+            {
+                $match: matchCondition
+            },
+            {
+                $group: {
+                    _id: "$userId",
+                    loginCount: { $sum: "$loginCount" },
+                    loginEvents: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Create a map of user IDs to login counts for easier lookup
+        const userLoginMap = {};
+        userLoginCounts.forEach(item => {
+            userLoginMap[item._id.toString()] = {
+                loginCount: item.loginCount,
+                loginEvents: item.loginEvents
+            };
+        });
+
         // NEW CODE: Fetch user details for these users
         const usersData = await User.find(
             { _id: { $in: uniqueUserIds } },
@@ -46,6 +69,21 @@ exports.getLoginsByDay = async (req, res) => {
                 Phd: 1
             }
         ).lean();
+
+        // Add login counts to user data
+        const enrichedUsersData = usersData.map(user => {
+            const userId = user._id.toString();
+            const loginInfo = userLoginMap[userId] || { loginCount: 0, loginEvents: 0 };
+
+            return {
+                ...user,
+                EmpID: user.EmpID || 'N/A',
+                JoiningDate: user.JoiningDate || 'N/A',
+                Qualification: user.Qualification || 'N/A',
+                loginCount: loginInfo.loginCount,
+                loginEvents: loginInfo.loginEvents
+            };
+        });
 
         // Check if hourly breakdown is requested
         if (req.query.hourly === 'true') {
@@ -96,7 +134,7 @@ exports.getLoginsByDay = async (req, res) => {
             const totalLogins = hourlyData.reduce((sum, item) => sum + item.totalLogins, 0);
             const totalCount = hourlyData.reduce((sum, item) => sum + item.count, 0);
 
-            // NEW CODE: Add users data to the response
+            // Return with enriched user data
             return res.status(200).json({
                 success: true,
                 date: targetDate.toISOString().split('T')[0],
@@ -106,13 +144,8 @@ exports.getLoginsByDay = async (req, res) => {
                     labels: hours.map(h => `${h}:00`),
                     datasets
                 },
-                // Add the users data here
-                usersData: usersData.map(user => ({
-                    ...user,
-                    EmpID: user.EmpID || 'N/A',
-                    JoiningDate: user.JoiningDate || 'N/A',
-                    Qualification: user.Qualification || 'N/A'
-                }))
+                // Replace usersData with enrichedUsersData
+                usersData: enrichedUsersData
             });
         }
 
@@ -154,7 +187,7 @@ exports.getLoginsByDay = async (req, res) => {
             }
         };
 
-        // NEW CODE: Add users data to the response
+        // Return with enriched user data
         res.status(200).json({
             success: true,
             date: targetDate.toISOString().split('T')[0],
@@ -162,13 +195,8 @@ exports.getLoginsByDay = async (req, res) => {
             totalCount,
             byDesignation: loginData,
             chartData,
-            // Add the users data here
-            usersData: usersData.map(user => ({
-                ...user,
-                EmpID: user.EmpID || 'N/A',
-                JoiningDate: user.JoiningDate || 'N/A',
-                Qualification: user.Qualification || 'N/A'
-            }))
+            // Replace usersData with enrichedUsersData
+            usersData: enrichedUsersData
         });
     } catch (error) {
         console.error('Error fetching logins by day:', error);
