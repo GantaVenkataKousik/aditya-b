@@ -4,6 +4,7 @@ const Class = require('../models/class-model');
 const User = require('../models/user-model');
 const Feedback = require('../models/Feedback');
 const mongoose = require('mongoose');
+const { logCreateOperation, logUpdateOperation, logDeleteOperation } = require('../utils/operationLogger');
 
 
 router.post('/courses/addclass/:userId', async (req, res) => {
@@ -57,6 +58,13 @@ router.post('/courses/addclass/:userId', async (req, res) => {
         user.AvgSelfAsses = totalMarks; // Update the user's average self-assessment marks
         await user.save(); // Save the updated user document
 
+        // Log create operation
+        await logCreateOperation(savedClass._id, 'Class', {
+            title: savedClass.courseName || 'New class',
+            subject: savedClass.courseName,
+            totalStudents: savedClass.numberOfStudents
+        });
+
         // Respond with the saved class and average pass percentage
         res.status(200).json({ success: true, message: 'Class added successfully', data: savedClass, averagePassPercentage });
     } catch (error) {
@@ -72,6 +80,13 @@ router.delete("/courses/:id", async (req, res) => {
         if (!deletedCourse) {
             return res.status(404).json({ message: "Course not found" });
         }
+
+        // Log delete operation
+        await logDeleteOperation(courseId, 'Class', {
+            title: deletedCourse.courseName,
+            subject: deletedCourse.courseName
+        });
+
         res.status(200).json({ success: true, message: "Course deleted successfully" });
     } catch (error) {
         console.error("Error deleting course:", error.message);
@@ -94,6 +109,9 @@ router.put('/courses/:id', async (req, res) => {
             console.log("No course found with ID:", classId);
             return res.status(404).json({ message: 'Course not found' });
         }
+
+        // Log update operation
+        await logUpdateOperation(classId, 'Class', updatedCourse.toObject(), req.body);
 
         res.status(200).json({ success: true, message: 'Course updated successfully', data: updatedCourse });
 
@@ -125,6 +143,15 @@ router.put('/:id', async (req, res) => {
         const classId = req.params.id;
         const { courseName, semester, numberOfStudents, passCount } = req.body;
         const updatedClass = await Class.findByIdAndUpdate(classId, { courseName, semester, numberOfStudents, passCount }, { new: true });
+
+        if (!updatedClass) {
+            console.log("No class found with ID:", classId);
+            return res.status(404).json({ message: 'Class not found' });
+        }
+
+        // Log update operation
+        await logUpdateOperation(classId, 'Class', updatedClass.toObject(), req.body);
+
         res.status(200).json({ success: true, message: 'Class updated successfully', data: updatedClass });
     } catch (error) {
         console.error('Error updating class:', error);
@@ -256,4 +283,5 @@ router.get("/feedback/fdata/:userId", async (req, res) => {
         res.status(500).json({ message: "Unable to fetch feedback" });
     }
 });
+
 module.exports = router;

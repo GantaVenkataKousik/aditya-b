@@ -62,7 +62,13 @@ const getOperationsByDay = async (req, res) => {
         };
 
         // Add optional filters
-        if (userId) matchCondition.userId = mongoose.Types.ObjectId(userId);
+        if (userId) {
+            try {
+                matchCondition.userId = new mongoose.Types.ObjectId(userId);
+            } catch (err) {
+                console.error('Invalid userId format, ignoring filter');
+            }
+        }
         if (operation) matchCondition.operation = operation;
         if (modelName) matchCondition.modelName = modelName;
 

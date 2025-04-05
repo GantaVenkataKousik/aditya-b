@@ -12,7 +12,7 @@ const Article = require('../models/articles');
 const Responsibility = require('../models/responsibilities');
 const Contribution = require('../models/contributions');
 const Award = require('../models/awards');
-const { logOperation } = require('../controllers/operation-tracking-controller');
+const { logCreateOperation, logUpdateOperation, logDeleteOperation } = require('../utils/operationLogger');
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -38,43 +38,18 @@ router.get('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        // Get admin ID from token or default to a placeholder
-        const adminId = req.user ? req.user._id : '000000000000000000000000';
 
-        // Get original user data for tracking changes
+        // Get original user data
         const originalUser = await User.findById(id);
         if (!originalUser) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Identify changed fields
-        const changedFields = {};
-        Object.keys(req.body).forEach(key => {
-            if (originalUser[key] !== req.body[key]) {
-                changedFields[key] = {
-                    from: originalUser[key],
-                    to: req.body[key]
-                };
-            }
-        });
-
         // Update user
         const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
 
-        // Log operation if fields were changed
-        if (Object.keys(changedFields).length > 0) {
-            await logOperation(
-                adminId,
-                id,
-                'User',
-                'UPDATE',
-                {
-                    userId: id,
-                    userName: originalUser.fullName,
-                    changedFields
-                }
-            );
-        }
+        // Log the update operation
+        await logUpdateOperation(id, 'User', originalUser.toObject(), req.body);
 
         res.json(updatedUser);
     } catch (error) {
@@ -87,10 +62,8 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        // Get admin ID from token
-        const adminId = req.user ? req.user._id : '000000000000000000000000';
 
-        // Get user details to include in the log
+        // Get user details for logging
         const user = await User.findById(id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -99,21 +72,13 @@ router.delete('/:id', async (req, res) => {
         // Delete user
         await User.findByIdAndDelete(id);
 
-        // Log the operation
-        await logOperation(
-            adminId,
-            id,
-            'User',
-            'DELETE',
-            {
-                deletedUser: {
-                    fullName: user.fullName,
-                    email: user.email,
-                    designation: user.designation,
-                    department: user.department
-                }
-            }
-        );
+        // Log the delete operation
+        await logDeleteOperation(id, 'User', {
+            fullName: user.fullName,
+            email: user.email,
+            designation: user.designation,
+            department: user.department
+        });
 
         res.json({ success: true, message: 'User deleted successfully' });
     } catch (error) {

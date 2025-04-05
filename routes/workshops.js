@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user-model');
 const WorkshopData = require('../models/workshops');
+const { logCreateOperation, logUpdateOperation, logDeleteOperation } = require('../utils/operationLogger');
 
 
 router.get("/:userId", async (req, res) => {
@@ -33,6 +34,13 @@ router.post("/:userId", async (req, res) => {
 
     const newWorkshop = new WorkshopData(workshopData);
     await newWorkshop.save();
+
+    // Log create operation
+    await logCreateOperation(newWorkshop._id, 'Workshop', {
+      title: newWorkshop.title || 'New workshop',
+      date: newWorkshop.date,
+      organizer: newWorkshop.organizer
+    });
 
     res.status(201).json({
       success: true,
@@ -84,6 +92,13 @@ router.delete("/:userId/:workshopId", async (req, res) => {
 
     await WorkshopData.findByIdAndDelete(workshopId);
 
+    // Log delete operation
+    await logDeleteOperation(workshopId, 'Workshop', {
+      title: workshop.title,
+      date: workshop.date,
+      organizer: workshop.organizer
+    });
+
     res.status(200).json({
       success: true,
       message: "Workshop deleted successfully"
@@ -122,6 +137,9 @@ router.put("/:userId/:workshopId", async (req, res) => {
       updateData,
       { new: true }
     );
+
+    // Log update operation
+    await logUpdateOperation(workshopId, 'Workshop', workshop.toObject(), updateData);
 
     res.status(200).json({
       success: true,

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Proctoring = require("../models/ProctoringModel");
 const User = require("../models/user-model");
+const { logCreateOperation, logUpdateOperation, logDeleteOperation } = require('../utils/operationLogger');
+
 // Fetch all proctoring data
 router.get("/:userId", async (req, res) => {
     try {
@@ -69,6 +71,12 @@ router.post("/:userId", async (req, res) => {
         user.ProctorSelfAsses = selfAssessmentMarks;
         await user.save();
 
+        // Log create operation
+        await logCreateOperation(newProctoring._id, 'Proctoring', {
+            lecturer: newProctoring.teacher,
+            studentsCount: newProctoring.totalStudents
+        });
+
         // Respond with saved data
         res.status(200).json({ success: true, message: 'Proctoring data added successfully', data: newProctoring });
 
@@ -82,6 +90,11 @@ router.delete('/:id', async (req, res) => {
     try {
         const proctoringId = req.params.id;
         const deletedProctoring = await Proctoring.findByIdAndDelete(proctoringId);
+        // Log delete operation
+        await logDeleteOperation(proctoringId, 'Proctoring', {
+            lecturer: deletedProctoring.teacher,
+            studentsCount: deletedProctoring.totalStudents
+        });
         res.status(200).json({ success: true, message: "Proctoring data deleted successfully" });
     } catch (error) {
         console.error('Error deleting proctoring data:', error);
@@ -94,6 +107,13 @@ router.put('/:id', async (req, res) => {
         const proctoringId = req.params.id;
         const { totalStudents, semesterBranchSec, eligibleStudents, passedStudents } = req.body;
         const updatedProctoring = await Proctoring.findByIdAndUpdate(proctoringId, { totalStudents, semesterBranchSec, eligibleStudents, passedStudents }, { new: true });
+        // Log update operation
+        await logUpdateOperation(proctoringId, 'Proctoring', {
+            totalStudents: updatedProctoring.totalStudents,
+            semesterBranchSec: updatedProctoring.semesterBranchSec,
+            eligibleStudents: updatedProctoring.eligibleStudents,
+            passedStudents: updatedProctoring.passedStudents
+        }, req.body);
         res.status(200).json({ success: true, message: 'Proctoring data updated successfully', data: updatedProctoring });
     } catch (error) {
         console.error('Error updating proctoring data:', error);
