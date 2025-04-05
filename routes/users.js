@@ -87,7 +87,9 @@ router.delete('/:id', async (req, res) => {
             fullName: user.fullName,
             email: user.email,
             designation: user.designation,
-            department: user.department
+            department: user.department,
+            EmpID: user.EmpID,
+            // Include any other relevant user details you want to see
         });
 
         res.json({ success: true, message: 'User deleted successfully' });

@@ -3,13 +3,19 @@ const { logOperation } = require('../controllers/operation-tracking-controller')
 // Utility functions for logging operations
 const logCreateOperation = async (userId, targetId, modelName, entityData) => {
     try {
+        // Make a clean copy of data, removing sensitive fields
+        const cleanData = { ...entityData };
+
+        // Remove sensitive information if present
+        if (cleanData.password) delete cleanData.password;
+
         await logOperation(
             userId,
             targetId,
             modelName,
             'CREATE',
             {
-                newEntity: entityData
+                newEntity: cleanData
             }
         );
         return true;
@@ -53,13 +59,19 @@ const logUpdateOperation = async (userId, targetId, modelName, originalData, new
 
 const logDeleteOperation = async (userId, targetId, modelName, deletedData) => {
     try {
+        // Make a clean copy of data, removing sensitive fields
+        const cleanData = { ...deletedData };
+
+        // Remove sensitive information if present
+        if (cleanData.password) delete cleanData.password;
+
         await logOperation(
             userId,
             targetId,
             modelName,
             'DELETE',
             {
-                deletedEntity: deletedData
+                deletedEntity: cleanData
             }
         );
         return true;

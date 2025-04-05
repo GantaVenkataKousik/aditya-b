@@ -102,7 +102,176 @@ const getOperationsByDay = async (req, res) => {
     }
 };
 
+// Enhance getFieldLabel with more field mappings
+const getFieldLabel = (fieldName) => {
+    const fieldLabels = {
+        fullName: "Full Name",
+        email: "Email",
+        EmpID: "Employee ID",
+        designation: "Designation",
+        department: "Department",
+        JoiningDate: "Joining Date",
+        Qualification: "Qualification",
+        UG: "UG Institution",
+        UGYear: "UG Year",
+        PG: "PG Institution",
+        PGYear: "PG Year",
+        Phd: "PhD",
+        PhdYear: "PhD Year",
+        Industry: "Industry Experience",
+        TExp: "Teaching Experience",
+        title: "Title",
+        description: "Description",
+        courseName: "Course Name",
+        semester: "Semester",
+        section: "Section",
+        branch: "Branch",
+        numberOfStudents: "Number of Students",
+        passPercentage: "Pass Percentage",
+        activityDetails: "Activity Details",
+        Responsibility: "Responsibility",
+        AssignedBy: "Assigned By",
+        contributionDetails: "Contribution Details",
+        Benefit: "Benefit",
+        Award: "Award Name",
+        AwardedBy: "Awarded By",
+        Level: "Level",
+        // Add all other relevant field mappings
+    };
+
+    return fieldLabels[fieldName] || fieldName;
+};
+
+// Ensure formatValue handles all data types properly
+const formatValue = (value) => {
+    if (value === undefined || value === null) return 'null';
+
+    if (Array.isArray(value)) {
+        try {
+            return JSON.stringify(value);
+        } catch (e) {
+            return '[Array]';
+        }
+    }
+
+    if (typeof value === 'object' && value !== null) {
+        try {
+            return JSON.stringify(value);
+        } catch (e) {
+            return '[Object]';
+        }
+    }
+
+    // Handle Date objects
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+
+    return String(value);
+};
+
+// In the logCreateOperation function
+const logCreateOperation = async (userId, entityId, modelName, newEntityData) => {
+    try {
+        // Filter out sensitive or unnecessary fields
+        const filteredData = { ...newEntityData };
+        if (filteredData.password) delete filteredData.password;
+        if (filteredData.__v) delete filteredData.__v;
+
+        const operation = new OperationTracking({
+            userId,
+            entityId,
+            modelName,
+            operation: 'CREATE',
+            details: {
+                newEntity: filteredData
+            }
+        });
+
+        await operation.save();
+    } catch (error) {
+        console.error("Error logging create operation:", error);
+    }
+};
+
+// In the logUpdateOperation function
+const logUpdateOperation = async (userId, entityId, modelName, originalData, newData) => {
+    try {
+        const changedFields = {};
+
+        Object.keys(newData).forEach(key => {
+            // Skip userId, password and internal fields
+            if (key === 'userId' || key === 'password' || key === '_id' || key === '__v') return;
+
+            // Check for different types and handle comparisons
+            let valuesAreDifferent = false;
+
+            if (Array.isArray(originalData[key]) && Array.isArray(newData[key])) {
+                valuesAreDifferent = JSON.stringify(originalData[key]) !== JSON.stringify(newData[key]);
+            } else if (
+                typeof originalData[key] === 'object' && originalData[key] !== null &&
+                typeof newData[key] === 'object' && newData[key] !== null
+            ) {
+                valuesAreDifferent = JSON.stringify(originalData[key]) !== JSON.stringify(newData[key]);
+            } else {
+                valuesAreDifferent = originalData[key] !== newData[key];
+            }
+
+            if (valuesAreDifferent) {
+                changedFields[key] = {
+                    from: formatValue(originalData[key]),
+                    to: formatValue(newData[key])
+                };
+            }
+        });
+
+        // Only log if there are actual changes
+        if (Object.keys(changedFields).length > 0) {
+            const operation = new OperationTracking({
+                userId,
+                entityId,
+                modelName,
+                operation: 'UPDATE',
+                details: {
+                    changedFields
+                }
+            });
+
+            await operation.save();
+        }
+    } catch (error) {
+        console.error("Error logging update operation:", error);
+    }
+};
+
+// In the logDeleteOperation function
+const logDeleteOperation = async (userId, entityId, modelName, entityData) => {
+    try {
+        // Filter out sensitive or unnecessary fields
+        const filteredData = { ...entityData };
+        if (filteredData.password) delete filteredData.password;
+        if (filteredData.__v) delete filteredData.__v;
+
+        const operation = new OperationTracking({
+            userId,
+            entityId,
+            modelName,
+            operation: 'DELETE',
+            details: {
+                deletedEntity: filteredData
+            }
+        });
+
+        await operation.save();
+    } catch (error) {
+        console.error("Error logging delete operation:", error);
+    }
+};
+
 module.exports = {
     logOperation,
-    getOperationsByDay
+    getOperationsByDay,
+    logCreateOperation,
+    logUpdateOperation,
+    logDeleteOperation
 }; 
