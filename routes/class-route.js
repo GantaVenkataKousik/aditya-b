@@ -59,7 +59,7 @@ router.post('/courses/addclass/:userId', async (req, res) => {
         await user.save(); // Save the updated user document
 
         // Log create operation
-        await logCreateOperation(savedClass._id, 'Class', {
+        await logCreateOperation(userId, savedClass._id, 'Class', {
             title: savedClass.courseName || 'New class',
             subject: savedClass.courseName,
             totalStudents: savedClass.numberOfStudents
@@ -82,7 +82,7 @@ router.delete("/courses/:id", async (req, res) => {
         }
 
         // Log delete operation
-        await logDeleteOperation(courseId, 'Class', {
+        await logDeleteOperation(req.query.userId, courseId, 'Class', {
             title: deletedCourse.courseName,
             subject: deletedCourse.courseName
         });
@@ -98,6 +98,10 @@ router.put('/courses/:id', async (req, res) => {
     try {
         const classId = req.params.id;
         const { courseName, semester, numberOfStudents, passCount } = req.body;
+        const userId = req.body.updatedBy || req.query.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
         // Update the course    
         const updatedCourse = await Class.findByIdAndUpdate(
             classId,
@@ -111,7 +115,7 @@ router.put('/courses/:id', async (req, res) => {
         }
 
         // Log update operation
-        await logUpdateOperation(classId, 'Class', updatedCourse.toObject(), req.body);
+        await logUpdateOperation(userId, classId, 'Class', updatedCourse.toObject(), req.body);
 
         res.status(200).json({ success: true, message: 'Course updated successfully', data: updatedCourse });
 
@@ -142,6 +146,10 @@ router.put('/:id', async (req, res) => {
     try {
         const classId = req.params.id;
         const { courseName, semester, numberOfStudents, passCount } = req.body;
+        const userId = req.body.updatedBy || req.query.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
         const updatedClass = await Class.findByIdAndUpdate(classId, { courseName, semester, numberOfStudents, passCount }, { new: true });
 
         if (!updatedClass) {
@@ -150,7 +158,7 @@ router.put('/:id', async (req, res) => {
         }
 
         // Log update operation
-        await logUpdateOperation(classId, 'Class', updatedClass.toObject(), req.body);
+        await logUpdateOperation(userId, classId, 'Class', updatedClass.toObject(), req.body);
 
         res.status(200).json({ success: true, message: 'Class updated successfully', data: updatedClass });
     } catch (error) {
@@ -211,6 +219,10 @@ router.put('/feedback/:id', async (req, res) => {
     try {
         const feedbackId = req.params.id;
         const { courseName, semester, numberOfStudents, feedbackpercent } = req.body;
+        const userId = req.body.updatedBy || req.query.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
         const updatedFeedback = await Feedback.findByIdAndUpdate(feedbackId, { courseName, semester, numberOfStudents, feedbackpercent }, { new: true });
         res.status(200).json({ success: true, message: 'Feedback updated successfully', data: updatedFeedback });
     } catch (error) {
@@ -223,6 +235,10 @@ router.delete('/feedback/:id', async (req, res) => {
     try {
         const feedbackId = req.params.id;
         const deletedFeedback = await Feedback.findByIdAndDelete(feedbackId);
+        const userId = req.query.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
         res.status(200).json({ success: true, message: "Feedback deleted successfully" });
     } catch (error) {
         console.error('Error deleting feedback:', error);
@@ -266,6 +282,10 @@ router.get("/raw", async (req, res) => {
 router.post('/courses/add', async (req, res) => {
     try {
         const { courseName, semester, numberOfStudents, passCount } = req.body;
+        const userId = req.body.createdBy || req.query.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
         const newCourse = new Class({ courseName, semester, numberOfStudents, passCount });
         await newCourse.save();
         res.status(200).json({ success: true, message: 'Course added successfully', course: newCourse });

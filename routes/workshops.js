@@ -36,7 +36,7 @@ router.post("/:userId", async (req, res) => {
     await newWorkshop.save();
 
     // Log create operation
-    await logCreateOperation(newWorkshop._id, 'Workshop', {
+    await logCreateOperation(userId, newWorkshop._id, 'Workshop', {
       title: newWorkshop.title || 'New workshop',
       date: newWorkshop.date,
       organizer: newWorkshop.organizer
@@ -93,7 +93,7 @@ router.delete("/:userId/:workshopId", async (req, res) => {
     await WorkshopData.findByIdAndDelete(workshopId);
 
     // Log delete operation
-    await logDeleteOperation(workshopId, 'Workshop', {
+    await logDeleteOperation(userId, workshopId, 'Workshop', {
       title: workshop.title,
       date: workshop.date,
       organizer: workshop.organizer
@@ -139,7 +139,7 @@ router.put("/:userId/:workshopId", async (req, res) => {
     );
 
     // Log update operation
-    await logUpdateOperation(workshopId, 'Workshop', workshop.toObject(), updateData);
+    await logUpdateOperation(userId, workshopId, 'Workshop', workshop.toObject(), updateData);
 
     res.status(200).json({
       success: true,

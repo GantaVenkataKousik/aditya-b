@@ -7,12 +7,17 @@ const { logCreateOperation, logUpdateOperation } = require('../utils/operationLo
 router.post('/', async (req, res) => {
     try {
         const userData = req.body;
+        const userId = req.body.createdBy || req.query.userId; // Get userId from body or query
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
 
         // Create new user
         const newUser = await User.create(userData);
 
         // Log the create operation
-        await logCreateOperation(newUser._id, 'User', {
+        await logCreateOperation(userId, newUser._id, 'User', {
             fullName: newUser.fullName,
             email: newUser.email,
             designation: newUser.designation,
@@ -27,10 +32,15 @@ router.post('/', async (req, res) => {
 });
 
 // PUT route for updating user
-router.put('/:id', async (req, res) => {
+router.put('/', async (req, res) => {
     try {
-        const { id } = req.params;
         const userData = req.body;
+        const userId = req.body.updatedBy || req.query.userId; // Get userId from body or query
+        const id = userData._id;
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
 
         // Find existing user
         const originalUser = await User.findById(id);
@@ -42,7 +52,7 @@ router.put('/:id', async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
 
         // Log update operation
-        await logUpdateOperation(id, 'User', originalUser.toObject(), userData);
+        await logUpdateOperation(userId, id, 'User', originalUser.toObject(), userData);
 
         res.json(updatedUser);
     } catch (error) {

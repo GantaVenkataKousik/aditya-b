@@ -38,6 +38,11 @@ router.get('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.body.userId || req.query.userId; // Get userId from body or query
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
 
         // Get original user data
         const originalUser = await User.findById(id);
@@ -49,7 +54,7 @@ router.put('/:id', async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
 
         // Log the update operation
-        await logUpdateOperation(id, 'User', originalUser.toObject(), req.body);
+        await logUpdateOperation(userId, id, 'User', originalUser.toObject(), req.body);
 
         res.json(updatedUser);
     } catch (error) {
@@ -62,6 +67,11 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.query.userId; // Get userId from query
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
 
         // Get user details for logging
         const user = await User.findById(id);
@@ -73,7 +83,7 @@ router.delete('/:id', async (req, res) => {
         await User.findByIdAndDelete(id);
 
         // Log the delete operation
-        await logDeleteOperation(id, 'User', {
+        await logDeleteOperation(userId, id, 'User', {
             fullName: user.fullName,
             email: user.email,
             designation: user.designation,

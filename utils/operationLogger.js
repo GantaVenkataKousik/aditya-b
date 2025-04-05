@@ -1,13 +1,10 @@
 const { logOperation } = require('../controllers/operation-tracking-controller');
 
-// Default user ID to use when no authentication is available
-const DEFAULT_USER_ID = '000000000000000000000000';
-
 // Utility functions for logging operations
-const logCreateOperation = async (targetId, modelName, entityData) => {
+const logCreateOperation = async (userId, targetId, modelName, entityData) => {
     try {
         await logOperation(
-            DEFAULT_USER_ID,
+            userId,
             targetId,
             modelName,
             'CREATE',
@@ -22,7 +19,7 @@ const logCreateOperation = async (targetId, modelName, entityData) => {
     }
 };
 
-const logUpdateOperation = async (targetId, modelName, originalData, newData) => {
+const logUpdateOperation = async (userId, targetId, modelName, originalData, newData) => {
     try {
         // Identify changed fields
         const changedFields = {};
@@ -37,7 +34,7 @@ const logUpdateOperation = async (targetId, modelName, originalData, newData) =>
 
         if (Object.keys(changedFields).length > 0) {
             await logOperation(
-                DEFAULT_USER_ID,
+                userId,
                 targetId,
                 modelName,
                 'UPDATE',
@@ -54,10 +51,10 @@ const logUpdateOperation = async (targetId, modelName, originalData, newData) =>
     }
 };
 
-const logDeleteOperation = async (targetId, modelName, deletedData) => {
+const logDeleteOperation = async (userId, targetId, modelName, deletedData) => {
     try {
         await logOperation(
-            DEFAULT_USER_ID,
+            userId,
             targetId,
             modelName,
             'DELETE',

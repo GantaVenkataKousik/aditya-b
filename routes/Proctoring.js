@@ -72,7 +72,7 @@ router.post("/:userId", async (req, res) => {
         await user.save();
 
         // Log create operation
-        await logCreateOperation(newProctoring._id, 'Proctoring', {
+        await logCreateOperation(userId, newProctoring._id, 'Proctoring', {
             lecturer: newProctoring.teacher,
             studentsCount: newProctoring.totalStudents
         });
@@ -88,36 +88,60 @@ router.post("/:userId", async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const proctoringId = req.params.id;
-        const deletedProctoring = await Proctoring.findByIdAndDelete(proctoringId);
+        const { id } = req.params;
+        const userId = req.query.userId; // Get userId from query
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
+
+        // Get proctoring details for logging
+        const proctoringData = await Proctoring.findById(id);
+        if (!proctoringData) {
+            return res.status(404).json({ success: false, message: 'Proctoring data not found' });
+        }
+
+        // Delete proctoring
+        await Proctoring.findByIdAndDelete(id);
+
         // Log delete operation
-        await logDeleteOperation(proctoringId, 'Proctoring', {
-            lecturer: deletedProctoring.teacher,
-            studentsCount: deletedProctoring.totalStudents
+        await logDeleteOperation(userId, id, 'Proctoring', {
+            lecturer: proctoringData.teacher,
+            studentsCount: proctoringData.totalStudents
         });
-        res.status(200).json({ success: true, message: "Proctoring data deleted successfully" });
+
+        res.json({ success: true, message: 'Proctoring data deleted successfully' });
     } catch (error) {
-        console.error('Error deleting proctoring data:', error);
-        res.status(400).json({ error: error.message });
+        console.error('Error deleting proctoring:', error);
+        res.status(500).json({ success: false, message: 'Error deleting proctoring data' });
     }
 });
 
 router.put('/:id', async (req, res) => {
     try {
-        const proctoringId = req.params.id;
-        const { totalStudents, semesterBranchSec, eligibleStudents, passedStudents } = req.body;
-        const updatedProctoring = await Proctoring.findByIdAndUpdate(proctoringId, { totalStudents, semesterBranchSec, eligibleStudents, passedStudents }, { new: true });
+        const { id } = req.params;
+        const userId = req.body.updatedBy || req.query.userId; // Get userId from body or query
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
+        }
+
+        // Get original proctoring data
+        const originalProctoring = await Proctoring.findById(id);
+        if (!originalProctoring) {
+            return res.status(404).json({ success: false, message: 'Proctoring data not found' });
+        }
+
+        // Update proctoring
+        const updatedProctoring = await Proctoring.findByIdAndUpdate(id, req.body, { new: true });
+
         // Log update operation
-        await logUpdateOperation(proctoringId, 'Proctoring', {
-            totalStudents: updatedProctoring.totalStudents,
-            semesterBranchSec: updatedProctoring.semesterBranchSec,
-            eligibleStudents: updatedProctoring.eligibleStudents,
-            passedStudents: updatedProctoring.passedStudents
-        }, req.body);
-        res.status(200).json({ success: true, message: 'Proctoring data updated successfully', data: updatedProctoring });
+        await logUpdateOperation(userId, id, 'Proctoring', originalProctoring.toObject(), req.body);
+
+        res.json(updatedProctoring);
     } catch (error) {
-        console.error('Error updating proctoring data:', error);
-        res.status(400).json({ error: error.message });
+        console.error('Error updating proctoring:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
