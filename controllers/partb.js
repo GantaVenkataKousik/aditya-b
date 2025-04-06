@@ -297,12 +297,13 @@ const deleteOutreach = async (req, res) => {
 //Activities Controllers
 const updateActivityByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
+        const { index } = req.params;
+        const userId = req.query.userId;
         const indexNum = parseInt(index, 10);
         const { activityDetails } = req.body;
 
         // Find the record for this user
-        const record = await Others.findOne({ userId: id });
+        const record = await Others.findOne({ userId: userId });
 
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
@@ -328,40 +329,53 @@ const updateActivityByIndex = async (req, res) => {
 
 const deleteActivityByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
+        const { index } = req.params;
         const userId = req.query.userId;
+        const indexNum = parseInt(index, 10);
 
-        const others = await Others.findById(id);
-        if (!others) {
-            return res.status(404).json({ message: 'Not found' });
+        // FIXED: Use findOne with userId instead of findById
+        const record = await Others.findOne({ userId: userId });
+        if (!record) {
+            return res.status(404).json({ message: 'Record not found' });
         }
 
-        // Store activity before deletion
-        const deletedActivity = others.Activities[index];
+        if (indexNum < 0 || indexNum >= record.Activities.length) {
+            return res.status(400).json({ message: 'Invalid activity index' });
+        }
+
+        // Store activity before deletion for logging
+        const deletedActivity = record.Activities[indexNum];
 
         // Remove the activity
-        others.Activities.splice(index, 1);
-        await others.save();
+        record.Activities.splice(indexNum, 1);
+        await record.save();
 
-        // Log the deletion with complete data
-        await logDeleteOperation(userId, id, 'Others.Activity', deletedActivity);
+        // Log the deletion if userId provided in query
+        const logUserId = req.query.userId;
+        if (logUserId) {
+            await logDeleteOperation(logUserId, record._id, 'Others.Activity', deletedActivity);
+        }
 
-        res.status(200).json({ success: true, message: 'Activity deleted' });
+        res.status(200).json({
+            success: true,
+            message: 'Activity deleted successfully'
+        });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
 //Responsibilities Controllers
 const updateResponsibilityByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
+        const { index } = req.params;
+        const userId = req.query.userId;
         const indexNum = parseInt(index, 10);
         const { Responsibility, assignedBy, UploadFiles } = req.body;
 
         // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
+        const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
@@ -391,8 +405,9 @@ const updateResponsibilityByIndex = async (req, res) => {
 
 const updateContributionByIndex = async (req, res) => {
     try {
-        const { id } = req.params;
-        const index = parseInt(req.params.index, 10);
+        const { index } = req.params;
+        const userId = req.query.userId;
+        const indexNum = parseInt(index, 10);
         const { contributionDetails, Benefit, UploadFiles } = req.body;
 
         // Check if index is a valid number
@@ -401,12 +416,12 @@ const updateContributionByIndex = async (req, res) => {
         }
 
         // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
+        const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        if (index < 0 || index >= record.Contribution.length) {
+        if (indexNum < 0 || indexNum >= record.Contribution.length) {
             return res.status(400).json({ message: 'Invalid contribution index' });
         }
 
@@ -430,25 +445,28 @@ const updateContributionByIndex = async (req, res) => {
 
 const updateAwardByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
-        const { Award, AwardedBy, Description, level } = req.body;
+        const { index } = req.params;
+        const userId = req.query.userId;
+        const indexNum = parseInt(index, 10);
+        const { Award, AwardedBy, Level, Description, UploadFiles } = req.body;
 
-        // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
+        // FIXED: Using userId to find the document
+        const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        if (index < 0 || index >= record.Awards.length) {
+        if (indexNum < 0 || indexNum >= record.Awards.length) {
             return res.status(400).json({ message: 'Invalid award index' });
         }
 
-        record.Awards[index].Award = Award;
-        record.Awards[index].AwardedBy = AwardedBy;
-        record.Awards[index].Level = Level;
-        record.Awards[index].Description = Description;
+        record.Awards[indexNum].Award = Award;
+        record.Awards[indexNum].AwardedBy = AwardedBy;
+        record.Awards[indexNum].Level = Level;
+        record.Awards[indexNum].Description = Description;
+
         if (UploadFiles) {
-            record.Awards[index].UploadFiles = UploadFiles;
+            record.Awards[indexNum].UploadFiles = UploadFiles;
         }
 
         await record.save();
@@ -456,7 +474,7 @@ const updateAwardByIndex = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Award updated successfully',
-            updatedAward: record.Awards[index]
+            updatedAward: record.Awards[indexNum]
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -465,10 +483,11 @@ const updateAwardByIndex = async (req, res) => {
 
 const deleteAwardByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
+        const { index } = req.params;
+        const userId = req.query.userId;
 
         // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
+        const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
@@ -494,10 +513,11 @@ const deleteAwardByIndex = async (req, res) => {
 
 const deleteContributionByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
+        const { index } = req.params;
+        const userId = req.query.userId;
 
         // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
+        const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
@@ -522,10 +542,11 @@ const deleteContributionByIndex = async (req, res) => {
 
 const deleteResponsibilityByIndex = async (req, res) => {
     try {
-        const { id, index } = req.params;
+        const { index } = req.params;
+        const userId = req.query.userId;
 
         // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
+        const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
@@ -552,7 +573,7 @@ const deleteResponsibilityByIndex = async (req, res) => {
 // Add Activity
 const addActivity = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.query.userId;
         const { activityDetails, uploadFiles } = req.body;
 
         const record = await Others.findOne({ userId });
@@ -576,7 +597,7 @@ const addActivity = async (req, res) => {
 // Add Award
 const addAward = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.query.userId;
         const { Award, AwardedBy, Level, Description } = req.body;
 
         const record = await Others.findOne({ userId });
@@ -600,7 +621,7 @@ const addAward = async (req, res) => {
 // Add Contribution
 const addContribution = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.query.userId;
         const { contributionDetails, Benefit } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -615,7 +636,7 @@ const addContribution = async (req, res) => {
 
 const addBooks = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.query.userId;
         const { bookDetails, ISBN, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -663,7 +684,7 @@ const addPapers = async (req, res) => {
 };
 const addArticle = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.query.userId;
         const { articleDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -681,7 +702,7 @@ const addArticle = async (req, res) => {
 };
 const addResponsibility = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.query.userId;
         const { Responsibility, AssignedBy } = req.body;
         const record = await Others.findOne({ userId });
 
