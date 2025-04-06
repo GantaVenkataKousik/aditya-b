@@ -381,7 +381,7 @@ const updateResponsibilityByIndex = async (req, res) => {
     try {
         const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
-        const { Responsibility, assignedBy, UploadFiles } = req.body;
+        const { Responsibility, AssignedBy, UploadFiles } = req.body;
 
         const record = await Others.findOne({ userId: userId });
         if (!record) {
@@ -397,7 +397,7 @@ const updateResponsibilityByIndex = async (req, res) => {
 
         // Update the responsibility
         record.Responsibilities[indexNum].Responsibility = Responsibility;
-        record.Responsibilities[indexNum].assignedBy = assignedBy;
+        record.Responsibilities[indexNum].AssignedBy = AssignedBy;
         if (UploadFiles) {
             record.Responsibilities[indexNum].UploadFiles = UploadFiles;
         }
@@ -411,7 +411,7 @@ const updateResponsibilityByIndex = async (req, res) => {
                 record._id,
                 'Others.Responsibility',
                 { index: indexNum, ...originalResponsibility },
-                { index: indexNum, Responsibility, assignedBy, UploadFiles }
+                { index: indexNum, Responsibility, AssignedBy, }
             );
         }
 
@@ -640,7 +640,7 @@ const addActivity = async (req, res) => {
     try {
         const { userId } = req.params;
         const { activityDetails } = req.body;
-
+        console.log("Activity data:", activityDetails);
         const record = await Others.findOne({ userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });

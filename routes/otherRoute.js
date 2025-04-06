@@ -96,7 +96,7 @@ router.post('/add-activity/:userId', async (req, res) => {
             otherData = new Others({ userId, activities: [] });
         }
 
-        otherData.activities.push(activityData);
+        otherData.Activities.push(activityData);
         await otherData.save();
 
         // Log the created activity
