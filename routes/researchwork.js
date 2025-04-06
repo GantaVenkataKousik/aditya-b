@@ -1125,26 +1125,31 @@ router.get("/getdata", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
+
+    // Map to the field names the frontend expects
     const responseData = {
-      CouAvgPerMarks: user.CouAvgPerMarks,
-      CoufeedMarks: user.CoufeedMarks,
-      ProctoringMarks: user.ProctoringMarks,
-      SciMarks: user.SciMarks,
-      WosMarks: user.WosMarks,
-      ProposalMarks: user.ProposalMarks,
-      ResearchSelfAssesMarks: user.ResearchSelfAsses,
-      WorkSelfAssesMarks: user.WorkSelfAsses,
-      OutreachSelfAssesMarks: user.OutreachSelfAsses,
-      AddSelfAssesMarks: user.AddSelfAsses,
-      SpecialSelfAssesMarks: user.SpeacialSelfAsses,
+      // Use the fields from user-model.js that have the default values of 10
+      AvgSelfAsses: user.AvgSelfAsses || user.couAvgPerMarks || 10,
+      feedSelfAsses: user.feedSelfAsses || user.CoufeedMarks || 10,
+      ProctorSelfAsses: user.ProctorSelfAsses || user.ProctoringMarks || 10,
+
+      SciMarks: user.SciMarks || 10,
+      WosMarks: user.WosMarks || 10,
+      ProposalMarks: user.ProposalMarks || 10,
+      ResearchSelfAssesMarks: user.ResearchSelfAsses || 10,
+      WorkSelfAssesMarks: user.WorkSelfAsses || 10,
+      OutreachSelfAssesMarks: user.OutreachSelfAsses || 0,
+      AddSelfAssesMarks: user.AddSelfAsses || 10,
+      SpecialSelfAssesMarks: user.SpeacialSelfAsses || 10,
     };
-    console.log(responseData);
+
+    console.log("Sending profile data:", responseData);
     res.status(200).json(responseData);
   } catch (error) {
     console.error("Error fetching Data:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-})
+});
 
 
 

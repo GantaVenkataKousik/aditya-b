@@ -34,11 +34,14 @@ const userSchema = new mongoose.Schema({
     SciMarks: { type: Number, default: 10 },
     WosMarks: { type: Number, default: 10 },
     WorkshopMarks: { type: Number, default: 20 },
-
-    CoufeedMarks: { type: Number, default: 0 },
-    couAvgPerMarks: { type: Number, default: 0 },
-    ProctoringMarks: { type: Number, default: 0 },
-    classes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }]
+    ResearchSelfAssesMarks: { type: Number, default: 10 },
+    CoufeedMarks: { type: Number, default: 10 },
+    couAvgPerMarks: { type: Number, default: 10 },
+    ProctoringMarks: { type: Number, default: 10 },
+    classes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
+    courseAvgPassMarks: { type: Number, default: 10 },
+    courseFeedbackMarks: { type: Number, default: 10 },
+    proctoringMarks: { type: Number, default: 10 },
 });
 
 module.exports = mongoose.model("User", userSchema); 
