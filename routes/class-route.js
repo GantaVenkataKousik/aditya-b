@@ -210,12 +210,13 @@ router.post('/feedback/:userId', async (req, res) => {
 router.put('/feedback/:id', async (req, res) => {
     try {
         const feedbackId = req.params.id;
-        const { courseName, semester, numberOfStudents, feedbackpercent } = req.body;
+        const { courseName, semester, numberOfStudents, feedbackPercentage, averagePercentage } = req.body;
+        console.log(req.body);
         const userId = req.body.updatedBy || req.query.userId;
         if (!userId) {
             return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
         }
-        const updatedFeedback = await Feedback.findByIdAndUpdate(feedbackId, { courseName, semester, numberOfStudents, feedbackpercent }, { new: true });
+        const updatedFeedback = await Feedback.findByIdAndUpdate(feedbackId, { courseName, semester, numberOfStudents, feedbackPercentage, averagePercentage }, { new: true });
         res.status(200).json({ success: true, message: 'Feedback updated successfully', data: updatedFeedback });
     } catch (error) {
         console.error('Error updating feedback:', error);
