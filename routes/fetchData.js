@@ -9,6 +9,7 @@ const Feedback = require('../models/Feedback');
 const Workshop = require('../models/workshops');
 const Others = require('../models/othersModel');
 const mongoose = require('mongoose');
+const { logUpdateOperation } = require('../utils/operationLogger');
 
 // this is for profile.jsx
 router.get("/", async (req, res) => {
@@ -72,18 +73,30 @@ router.put("/update-field/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     const updateData = req.body;
+
+    // Get the original user data for logging
+    const originalUser = await User.findById(userId);
+    if (!originalUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
       { new: true }
     );
 
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
+    // Log the update operation with complete original and updated data
+    await logUpdateOperation(
+      userId, // The user making the change
+      userId, // The target user being updated
+      'User',
+      originalUser.toObject(),
+      updatedUser.toObject()
+    );
 
     return res.status(200).json({
       success: true,

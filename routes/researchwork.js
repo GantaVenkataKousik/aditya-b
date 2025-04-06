@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/user-model');
 const ResearchData = require('../models/research');
 const mongoose = require('mongoose');
-const { logDeleteOperation } = require('../utils/operationLogger');
+const { logDeleteOperation, logUpdateOperation, logCreateOperation } = require('../utils/operationLogger');
 
 
 router.post("/add", async (req, res) => {
@@ -273,26 +273,35 @@ router.get("/researchtext", async (req, res) => {
 router.post("/sciarticles/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { articleDetails, ISSN, authorPosition } = req.body;
+    const articleData = req.body;
+
     let researchEntry = await ResearchData.findOne({ userId });
     if (!researchEntry) {
       researchEntry = new ResearchData({
         userId,
-        SciArticles: [{ articleDetails, ISSN, authorPosition }]
+        SciArticles: [articleData]
       });
     } else {
-      researchEntry.SciArticles.push({ articleDetails, ISSN, authorPosition });
+      researchEntry.SciArticles.push(articleData);
     }
 
     // Save the updated document
     await researchEntry.save();
-    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
 
+    // Log the creation operation
+    await logCreateOperation(
+      userId,
+      researchEntry._id,
+      'Research.SciArticle',
+      articleData
+    );
+
+    res.status(201).json({ message: "Article added successfully!", data: researchEntry });
   } catch (error) {
     console.error("Error while adding article:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-})
+});
 router.get("/sciarticles/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -306,17 +315,27 @@ router.get("/sciarticles/:userId", async (req, res) => {
 router.delete("/sciarticles/:userId/:index", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const index = req.params.index;
+    const index = parseInt(req.params.index, 10);
+
     const researchEntry = await ResearchData.findOne({ userId });
+    if (!researchEntry || !researchEntry.SciArticles || index >= researchEntry.SciArticles.length) {
+      return res.status(404).json({ message: "Article not found" });
+    }
 
-    // Store the item to be deleted for logging
-    const deletedItem = researchEntry.SciArticles[index];
+    // Store the article to be deleted for logging
+    const deletedArticle = researchEntry.SciArticles[index];
 
+    // Remove the article
     researchEntry.SciArticles.splice(index, 1);
     await researchEntry.save();
 
-    // Log the deletion with the specific item data
-    await logDeleteOperation(userId, researchEntry._id, 'Research.SciArticles', deletedItem);
+    // Log the deletion with complete data
+    await logDeleteOperation(
+      userId,
+      researchEntry._id,
+      'Research.SciArticle',
+      deletedArticle
+    );
 
     res.status(200).json({ message: "Article deleted successfully!" });
   } catch (error) {
@@ -327,10 +346,30 @@ router.delete("/sciarticles/:userId/:index", async (req, res) => {
 router.put("/sciarticles/:userId/:index", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const index = req.params.index;
+    const index = parseInt(req.params.index, 10);
+    const updatedData = req.body;
+
     const researchEntry = await ResearchData.findOne({ userId });
-    researchEntry.SciArticles[index] = req.body;
+    if (!researchEntry || !researchEntry.SciArticles || index >= researchEntry.SciArticles.length) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
+    // Store the original article for logging
+    const originalArticle = researchEntry.SciArticles[index];
+
+    // Update the article
+    researchEntry.SciArticles[index] = updatedData;
     await researchEntry.save();
+
+    // Log the update with both original and updated data
+    await logUpdateOperation(
+      userId,
+      researchEntry._id,
+      'Research.SciArticle',
+      originalArticle,
+      updatedData
+    );
+
     res.status(200).json({ message: "Article updated successfully!" });
   } catch (error) {
     console.error("Error while updating SCI article:", error);
