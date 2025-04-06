@@ -74,7 +74,7 @@ router.put("/update-field/:userId", async (req, res) => {
     const { userId } = req.params;
     const updateData = req.body;
 
-    // Get the original user data for logging
+    // Get current user data before updating
     const originalUser = await User.findById(userId);
     if (!originalUser) {
       return res.status(404).json({
@@ -83,10 +83,41 @@ router.put("/update-field/:userId", async (req, res) => {
       });
     }
 
+    // Check if email is being updated and already exists
+    if (updateData.email && updateData.email !== originalUser.email) {
+      const existingUser = await User.findOne({
+        email: updateData.email,
+        _id: { $ne: userId } // Exclude current user
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use by another user"
+        });
+      }
+    }
+
+    // Check if EmpID is being updated and already exists
+    if (updateData.EmpID && updateData.EmpID !== originalUser.EmpID) {
+      const existingUser = await User.findOne({
+        EmpID: updateData.EmpID,
+        _id: { $ne: userId } // Exclude current user
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Employee ID already in use by another user"
+        });
+      }
+    }
+
+    // Update user with the provided data
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     // Log the update operation with complete original and updated data
@@ -105,6 +136,17 @@ router.put("/update-field/:userId", async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating user data:", error);
+
+    // More descriptive error response
+    if (error.code === 11000) {
+      // Extract the duplicate key field name from the error message
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `${field} already exists. Please use a different value.`
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Error updating user data",
