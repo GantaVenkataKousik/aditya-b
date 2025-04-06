@@ -197,6 +197,11 @@ const logCreateOperation = async (userId, entityId, modelName, newEntityData) =>
 // In the logUpdateOperation function
 const logUpdateOperation = async (userId, entityId, modelName, originalData, newData) => {
     try {
+        // Filter out sensitive fields
+        const filteredOriginalData = { ...originalData };
+        if (filteredOriginalData.password) delete filteredOriginalData.password;
+        if (filteredOriginalData.__v) delete filteredOriginalData.__v;
+
         const changedFields = {};
 
         Object.keys(newData).forEach(key => {
@@ -233,6 +238,7 @@ const logUpdateOperation = async (userId, entityId, modelName, originalData, new
                 modelName,
                 operation: 'UPDATE',
                 details: {
+                    originalEntity: filteredOriginalData, // Store complete original entity
                     changedFields
                 }
             });

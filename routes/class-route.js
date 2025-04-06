@@ -58,12 +58,8 @@ router.post('/courses/addclass/:userId', async (req, res) => {
         user.AvgSelfAsses = totalMarks; // Update the user's average self-assessment marks
         await user.save(); // Save the updated user document
 
-        // Log create operation
-        await logCreateOperation(userId, savedClass._id, 'Class', {
-            title: savedClass.courseName || 'New class',
-            subject: savedClass.courseName,
-            totalStudents: savedClass.numberOfStudents
-        });
+        // Log the complete entity data
+        await logCreateOperation(userId, savedClass._id, 'Class', savedClass.toObject());
 
         // Respond with the saved class and average pass percentage
         res.status(200).json({ success: true, message: 'Class added successfully', data: savedClass, averagePassPercentage });
@@ -76,9 +72,9 @@ router.post('/courses/addclass/:userId', async (req, res) => {
 router.delete('/courses/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.query.userId; // Get userId from query parameters
+        const userId = req.query.userId;
 
-        // Fetch the class before deleting to log its data
+        // Fetch the complete class before deleting
         const courseToDelete = await Class.findById(id);
         if (!courseToDelete) {
             return res.status(404).json({ success: false, message: 'Course not found' });
@@ -87,7 +83,7 @@ router.delete('/courses/:id', async (req, res) => {
         // Delete the course
         await Class.findByIdAndDelete(id);
 
-        // Log the operation
+        // Log the complete entity data
         await logDeleteOperation(userId, id, 'Class', courseToDelete.toObject());
 
         return res.status(200).json({ success: true, message: 'Course deleted successfully' });
@@ -100,7 +96,7 @@ router.delete('/courses/:id', async (req, res) => {
 router.put('/courses/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.query.userId; // Get userId from query parameters
+        const userId = req.query.userId;
 
         // Fetch the original data
         const originalCourse = await Class.findById(id);
@@ -111,8 +107,8 @@ router.put('/courses/:id', async (req, res) => {
         // Update the course
         const updatedCourse = await Class.findByIdAndUpdate(id, req.body, { new: true });
 
-        // Log the operation
-        await logUpdateOperation(userId, id, 'Class', originalCourse.toObject(), req.body);
+        // Log the complete original and updated data
+        await logUpdateOperation(userId, id, 'Class', originalCourse.toObject(), updatedCourse.toObject());
 
         return res.status(200).json({ success: true, data: updatedCourse });
     } catch (error) {
