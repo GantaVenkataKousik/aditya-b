@@ -297,8 +297,7 @@ const deleteOutreach = async (req, res) => {
 //Activities Controllers
 const updateActivityByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
         const { activityDetails } = req.body;
 
@@ -341,8 +340,7 @@ const updateActivityByIndex = async (req, res) => {
 
 const deleteActivityByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
 
         // FIXED: Use findOne with userId instead of findById
@@ -381,8 +379,7 @@ const deleteActivityByIndex = async (req, res) => {
 //Responsibilities Controllers
 const updateResponsibilityByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
         const { Responsibility, assignedBy, UploadFiles } = req.body;
 
@@ -431,8 +428,7 @@ const updateResponsibilityByIndex = async (req, res) => {
 
 const updateContributionByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
         const { contributionDetails, Benefit, UploadFiles } = req.body;
 
@@ -481,8 +477,7 @@ const updateContributionByIndex = async (req, res) => {
 
 const updateAwardByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
         const { Award, AwardedBy, Level, Description, UploadFiles } = req.body;
 
@@ -532,8 +527,7 @@ const updateAwardByIndex = async (req, res) => {
 
 const deleteAwardByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
 
         const record = await Others.findOne({ userId: userId });
@@ -570,8 +564,7 @@ const deleteAwardByIndex = async (req, res) => {
 
 const deleteContributionByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
 
         const record = await Others.findOne({ userId: userId });
@@ -607,8 +600,7 @@ const deleteContributionByIndex = async (req, res) => {
 
 const deleteResponsibilityByIndex = async (req, res) => {
     try {
-        const { index } = req.params;
-        const userId = req.query.userId;
+        const { userId, index } = req.params;
         const indexNum = parseInt(index, 10);
 
         const record = await Others.findOne({ userId: userId });
@@ -646,7 +638,7 @@ const deleteResponsibilityByIndex = async (req, res) => {
 // Add Activity
 const addActivity = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { activityDetails, uploadFiles } = req.body;
 
         const record = await Others.findOne({ userId });
@@ -670,7 +662,7 @@ const addActivity = async (req, res) => {
 // Add Award
 const addAward = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { Award, AwardedBy, Level, Description } = req.body;
 
         const record = await Others.findOne({ userId });
@@ -694,7 +686,7 @@ const addAward = async (req, res) => {
 // Add Contribution
 const addContribution = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { contributionDetails, Benefit } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -719,7 +711,7 @@ const addContribution = async (req, res) => {
 
 const addBooks = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { bookDetails, ISBN, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -735,7 +727,7 @@ const addBooks = async (req, res) => {
 
 const addChapters = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { chapterDetails, publisher, ISBN, authorPosition, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
         record.Chapters.push({ chapterDetails, Publisher: publisher, ISBN, authorPosition, UploadFiles: uploadFiles });
@@ -749,7 +741,7 @@ const addChapters = async (req, res) => {
 
 const addPapers = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { paperDetails, authorPosition, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -767,7 +759,7 @@ const addPapers = async (req, res) => {
 };
 const addArticle = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { articleDetails, uploadFiles } = req.body;
         const record = await Others.findOne({ userId });
 
@@ -785,7 +777,7 @@ const addArticle = async (req, res) => {
 };
 const addResponsibility = async (req, res) => {
     try {
-        const userId = req.query.userId;
+        const { userId } = req.params;
         const { Responsibility, AssignedBy } = req.body;
         const record = await Others.findOne({ userId });
 
