@@ -24,20 +24,20 @@ const Others = require('../models/othersModel');
 const { logCreateOperation, logUpdateOperation, logDeleteOperation } = require('../utils/operationLogger');
 
 // Activities Routes
-router.put('/activities/:id/:index', updateActivityByIndex);
-router.delete('/activities/:id/:index', deleteActivityByIndex);
+router.put('/activities/:userId/:index', updateActivityByIndex);
+router.delete('/activities/:userId/:index', deleteActivityByIndex);
 
 // Responsibilities Routes
-router.put('/responsibilities/:id/:index', updateResponsibilityByIndex);
-router.delete('/responsibilities/:id/:index', deleteResponsibilityByIndex);
+router.put('/responsibilities/:userId/:index', updateResponsibilityByIndex);
+router.delete('/responsibilities/:userId/:index', deleteResponsibilityByIndex);
 
 // Contributions Routes
-router.put('/contribution/:id/:index', updateContributionByIndex);
-router.delete('/contribution/:id/:index', deleteContributionByIndex);
+router.put('/contribution/:userId/:index', updateContributionByIndex);
+router.delete('/contribution/:userId/:index', deleteContributionByIndex);
 
 // Awards Routes
-router.put('/awards/:id/:index', updateAwardByIndex);
-router.delete('/awards/:id/:index', deleteAwardByIndex);
+router.put('/awards/:userId/:index', updateAwardByIndex);
+router.delete('/awards/:userId/:index', deleteAwardByIndex);
 
 // Outreach Routes
 router.put('/outreach/:id', updateOutreach);

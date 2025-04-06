@@ -302,9 +302,7 @@ const updateActivityByIndex = async (req, res) => {
         const indexNum = parseInt(index, 10);
         const { activityDetails } = req.body;
 
-        // Find the record for this user
         const record = await Others.findOne({ userId: userId });
-
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
@@ -313,9 +311,23 @@ const updateActivityByIndex = async (req, res) => {
             return res.status(400).json({ message: 'Invalid activity index' });
         }
 
-        record.Activities[indexNum].activityDetails = activityDetails;
+        // Store original data for logging
+        const originalActivity = { ...record.Activities[indexNum] };
 
+        // Update the activity
+        record.Activities[indexNum].activityDetails = activityDetails;
         await record.save();
+
+        // Log the update operation
+        if (userId) {
+            await logUpdateOperation(
+                userId,
+                record._id,
+                'Others.Activity',
+                { index: indexNum, ...originalActivity },
+                { index: indexNum, activityDetails }
+            );
+        }
 
         res.status(200).json({
             success: true,
@@ -374,7 +386,6 @@ const updateResponsibilityByIndex = async (req, res) => {
         const indexNum = parseInt(index, 10);
         const { Responsibility, assignedBy, UploadFiles } = req.body;
 
-        // FIXED: Using userId instead of _id
         const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
@@ -384,6 +395,10 @@ const updateResponsibilityByIndex = async (req, res) => {
             return res.status(400).json({ message: 'Invalid responsibility index' });
         }
 
+        // Store original data for logging
+        const originalResponsibility = { ...record.Responsibilities[indexNum] };
+
+        // Update the responsibility
         record.Responsibilities[indexNum].Responsibility = Responsibility;
         record.Responsibilities[indexNum].assignedBy = assignedBy;
         if (UploadFiles) {
@@ -391,6 +406,17 @@ const updateResponsibilityByIndex = async (req, res) => {
         }
 
         await record.save();
+
+        // Log the update operation
+        if (userId) {
+            await logUpdateOperation(
+                userId,
+                record._id,
+                'Others.Responsibility',
+                { index: indexNum, ...originalResponsibility },
+                { index: indexNum, Responsibility, assignedBy, UploadFiles }
+            );
+        }
 
         res.status(200).json({
             success: true,
@@ -410,12 +436,7 @@ const updateContributionByIndex = async (req, res) => {
         const indexNum = parseInt(index, 10);
         const { contributionDetails, Benefit, UploadFiles } = req.body;
 
-        // Check if index is a valid number
-        if (isNaN(index)) {
-            return res.status(400).json({ message: 'Invalid index format' });
-        }
-
-        // FIXED: Using userId instead of _id
+        // FIXED: Using findOne with userId
         const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
@@ -425,18 +446,33 @@ const updateContributionByIndex = async (req, res) => {
             return res.status(400).json({ message: 'Invalid contribution index' });
         }
 
-        record.Contribution[index].contributionDetails = contributionDetails;
-        record.Contribution[index].Benefit = Benefit;
+        // Get original data for logging
+        const originalData = { ...record.Contribution[indexNum] };
+
+        // FIXED: Use indexNum consistently
+        record.Contribution[indexNum].contributionDetails = contributionDetails;
+        record.Contribution[indexNum].Benefit = Benefit;
         if (UploadFiles) {
-            record.Contribution[index].UploadFiles = UploadFiles;
+            record.Contribution[indexNum].UploadFiles = UploadFiles;
         }
 
         await record.save();
 
+        // FIXED: Log the update with both userId and record._id
+        if (userId) {
+            await logUpdateOperation(
+                userId,
+                record._id,
+                'Others.Contribution',
+                { index: indexNum, ...originalData },
+                { index: indexNum, contributionDetails, Benefit, UploadFiles }
+            );
+        }
+
         res.status(200).json({
             success: true,
             message: 'Contribution updated successfully',
-            updatedContribution: record.Contribution[index]
+            updatedContribution: record.Contribution[indexNum]
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -450,7 +486,6 @@ const updateAwardByIndex = async (req, res) => {
         const indexNum = parseInt(index, 10);
         const { Award, AwardedBy, Level, Description, UploadFiles } = req.body;
 
-        // FIXED: Using userId to find the document
         const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
@@ -460,16 +495,30 @@ const updateAwardByIndex = async (req, res) => {
             return res.status(400).json({ message: 'Invalid award index' });
         }
 
+        // Store original data for logging
+        const originalAward = { ...record.Awards[indexNum] };
+
+        // Update the award
         record.Awards[indexNum].Award = Award;
         record.Awards[indexNum].AwardedBy = AwardedBy;
         record.Awards[indexNum].Level = Level;
         record.Awards[indexNum].Description = Description;
-
         if (UploadFiles) {
             record.Awards[indexNum].UploadFiles = UploadFiles;
         }
 
         await record.save();
+
+        // Log the update operation
+        if (userId) {
+            await logUpdateOperation(
+                userId,
+                record._id,
+                'Others.Award',
+                { index: indexNum, ...originalAward },
+                { index: indexNum, Award, AwardedBy, Level, Description, UploadFiles }
+            );
+        }
 
         res.status(200).json({
             success: true,
@@ -485,20 +534,28 @@ const deleteAwardByIndex = async (req, res) => {
     try {
         const { index } = req.params;
         const userId = req.query.userId;
+        const indexNum = parseInt(index, 10);
 
-        // FIXED: Using userId instead of _id
         const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        if (index < 0 || index >= record.Awards.length) {
+        if (indexNum < 0 || indexNum >= record.Awards.length) {
             return res.status(400).json({ message: 'Invalid award index' });
         }
 
-        record.Awards.splice(index, 1);
+        // Store award before deletion for logging
+        const deletedAward = record.Awards[indexNum];
 
+        // Remove the award
+        record.Awards.splice(indexNum, 1);
         await record.save();
+
+        // Log the deletion
+        if (userId) {
+            await logDeleteOperation(userId, record._id, 'Others.Award', deletedAward);
+        }
 
         res.status(200).json({
             success: true,
@@ -515,20 +572,28 @@ const deleteContributionByIndex = async (req, res) => {
     try {
         const { index } = req.params;
         const userId = req.query.userId;
+        const indexNum = parseInt(index, 10);
 
-        // FIXED: Using userId instead of _id
         const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        if (index < 0 || index >= record.Contribution.length) {
+        if (indexNum < 0 || indexNum >= record.Contribution.length) {
             return res.status(400).json({ message: 'Invalid contribution index' });
         }
 
-        record.Contribution.splice(index, 1);
+        // Store contribution before deletion for logging
+        const deletedContribution = record.Contribution[indexNum];
 
+        // Remove the contribution
+        record.Contribution.splice(indexNum, 1);
         await record.save();
+
+        // Log the deletion
+        if (userId) {
+            await logDeleteOperation(userId, record._id, 'Others.Contribution', deletedContribution);
+        }
 
         res.status(200).json({
             success: true,
@@ -544,20 +609,28 @@ const deleteResponsibilityByIndex = async (req, res) => {
     try {
         const { index } = req.params;
         const userId = req.query.userId;
+        const indexNum = parseInt(index, 10);
 
-        // FIXED: Using userId instead of _id
         const record = await Others.findOne({ userId: userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        if (index < 0 || index >= record.Responsibilities.length) {
+        if (indexNum < 0 || indexNum >= record.Responsibilities.length) {
             return res.status(400).json({ message: 'Invalid responsibility index' });
         }
 
-        record.Responsibilities.splice(index, 1);
+        // Store responsibility before deletion for logging
+        const deletedResponsibility = record.Responsibilities[indexNum];
 
+        // Remove the responsibility
+        record.Responsibilities.splice(indexNum, 1);
         await record.save();
+
+        // Log the deletion
+        if (userId) {
+            await logDeleteOperation(userId, record._id, 'Others.Responsibility', deletedResponsibility);
+        }
 
         res.status(200).json({
             success: true,
@@ -625,8 +698,18 @@ const addContribution = async (req, res) => {
         const { contributionDetails, Benefit } = req.body;
         const record = await Others.findOne({ userId });
 
-        record.Contribution.push({ contributionDetails, Benefit });
+        if (!record) {
+            return res.status(404).json({ message: 'User record not found' });
+        }
+
+        const newContribution = { contributionDetails, Benefit };
+        record.Contribution.push(newContribution);
         await record.save();
+
+        // Add logging
+        if (userId) {
+            await logCreateOperation(userId, record._id, 'Others.Contribution', newContribution);
+        }
 
         res.status(200).json({ success: true, message: 'Contribution added successfully' });
     } catch (error) {
@@ -710,8 +793,14 @@ const addResponsibility = async (req, res) => {
             return res.status(404).json({ message: 'User record not found' });
         }
 
-        record.Responsibilities.push({ Responsibility, AssignedBy });
+        const newResponsibility = { Responsibility, AssignedBy };
+        record.Responsibilities.push(newResponsibility);
         await record.save();
+
+        // Add logging
+        if (userId) {
+            await logCreateOperation(userId, record._id, 'Others.Responsibility', newResponsibility);
+        }
 
         res.status(200).json({ success: true, message: 'Responsibility added successfully' });
     } catch (error) {
