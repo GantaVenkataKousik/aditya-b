@@ -639,14 +639,14 @@ const deleteResponsibilityByIndex = async (req, res) => {
 const addActivity = async (req, res) => {
     try {
         const { userId } = req.params;
-        const { activityDetails, uploadFiles } = req.body;
+        const { activityDetails } = req.body;
 
         const record = await Others.findOne({ userId });
         if (!record) {
             return res.status(404).json({ message: 'Record not found' });
         }
 
-        const newActivity = { activityDetails, UploadFiles: uploadFiles };
+        const newActivity = { activityDetails };
         record.Activities.push(newActivity);
         await record.save();
 
