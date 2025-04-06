@@ -21,6 +21,8 @@ const {
     addResponsibility
 } = require('../controllers/partb.js');
 const Others = require('../models/othersModel');
+const { logCreateOperation } = require('../utils/logger');
+
 // Activities Routes
 router.put('/activities/:id/:index', updateActivityByIndex);
 router.delete('/activities/:id/:index', deleteActivityByIndex);
@@ -56,7 +58,34 @@ router.get('/others-data', async (req, res) => {
 });
 
 router.post('/add-article/:userId', addArticle);
-router.post('/add-activity/:userId', addActivity);
+router.post('/add-activity/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const activityData = req.body;
+
+        let otherData = await Others.findOne({ userId });
+        if (!otherData) {
+            otherData = new Others({ userId, activities: [] });
+        }
+
+        otherData.activities.push(activityData);
+        await otherData.save();
+
+        // Log the created activity
+        await logCreateOperation(
+            userId,
+            otherData._id,
+            'Others.Activity',
+            activityData
+        );
+
+        res.status(201).json({ success: true, data: otherData });
+    } catch (error) {
+        console.error("Error adding activity:", error);
+        res.status(500).json({ message: "Error adding activity" });
+    }
+});
+
 router.post('/add-award/:userId', addAward);
 router.post('/add-books/:userId', addBooks);
 router.post('/add-chapters/:userId', addChapters);

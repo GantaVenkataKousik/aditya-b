@@ -71,11 +71,8 @@ router.post("/:userId", async (req, res) => {
         user.ProctorSelfAsses = selfAssessmentMarks;
         await user.save();
 
-        // Log create operation
-        await logCreateOperation(userId, newProctoring._id, 'Proctoring', {
-            lecturer: newProctoring.teacher,
-            studentsCount: newProctoring.totalStudents
-        });
+        // FIXED: Pass the complete entity
+        await logCreateOperation(userId, newProctoring._id, 'Proctoring', newProctoring.toObject());
 
         // Respond with saved data
         res.status(200).json({ success: true, message: 'Proctoring data added successfully', data: newProctoring });
@@ -95,7 +92,7 @@ router.delete('/:id', async (req, res) => {
             return res.status(400).json({ success: false, message: 'User ID is required for tracking operations' });
         }
 
-        // Get proctoring details for logging
+        // Get complete proctoring details
         const proctoringData = await Proctoring.findById(id);
         if (!proctoringData) {
             return res.status(404).json({ success: false, message: 'Proctoring data not found' });
@@ -104,11 +101,8 @@ router.delete('/:id', async (req, res) => {
         // Delete proctoring
         await Proctoring.findByIdAndDelete(id);
 
-        // Log delete operation
-        await logDeleteOperation(userId, id, 'Proctoring', {
-            lecturer: proctoringData.teacher,
-            studentsCount: proctoringData.totalStudents
-        });
+        // FIXED: Pass the complete entity
+        await logDeleteOperation(userId, id, 'Proctoring', proctoringData.toObject());
 
         res.json({ success: true, message: 'Proctoring data deleted successfully' });
     } catch (error) {

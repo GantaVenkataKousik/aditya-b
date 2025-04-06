@@ -4,6 +4,7 @@ const Research = require('../models/research');
 const Workshops = require('../models/workshops');
 const User = require('../models/user-model');
 const Others = require('../models/othersModel.js');
+const { logDeleteOperation } = require('../utils/operationLogger');
 
 //Feedback Controllers
 const updateFeedback = async (req, res) => {
@@ -204,31 +205,27 @@ const updateActivityByIndex = async (req, res) => {
 const deleteActivityByIndex = async (req, res) => {
     try {
         const { id, index } = req.params;
+        const userId = req.query.userId;
 
-        // FIXED: Using userId instead of _id
-        const record = await Others.findOne({ userId: id });
-        if (!record) {
-            return res.status(404).json({ message: 'Record not found' });
+        const others = await Others.findById(id);
+        if (!others) {
+            return res.status(404).json({ message: 'Not found' });
         }
 
-        // Check if the index is valid
-        if (index < 0 || index >= record.Activities.length) {
-            return res.status(400).json({ message: 'Invalid activity index' });
-        }
+        // Store activity before deletion
+        const deletedActivity = others.Activities[index];
 
-        // Remove the specific activity
-        record.Activities.splice(index, 1);
+        // Remove the activity
+        others.Activities.splice(index, 1);
+        await others.save();
 
-        // Save the updated document
-        await record.save();
+        // Log the deletion with complete data
+        await logDeleteOperation(userId, id, 'Others.Activity', deletedActivity);
 
-        res.json({
-            success: true,
-            message: 'Activity deleted successfully',
-            updatedActivities: record.Activities
-        });
+        res.status(200).json({ success: true, message: 'Activity deleted' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/user-model');
 const ResearchData = require('../models/research');
 const mongoose = require('mongoose');
+const { logDeleteOperation } = require('../utils/operationLogger');
 
 
 router.post("/add", async (req, res) => {
@@ -59,7 +60,19 @@ router.get("/otherResearch/:id", async (req, res) => {
 router.delete("/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.query.userId || req.body.userId;
+
+    // Fetch the research data before deleting
+    const researchToDelete = await ResearchData.findById(id);
+    if (!researchToDelete) {
+      return res.status(404).json({ message: "Research not found" });
+    }
+
     await ResearchData.findByIdAndDelete(id);
+
+    // Log the complete deleted entity
+    await logDeleteOperation(userId, id, 'Research', researchToDelete.toObject());
+
     res.status(200).json({ message: "Research Deleted" });
   } catch (error) {
     console.log("Error occurred while deleting:", error);
@@ -295,8 +308,16 @@ router.delete("/sciarticles/:userId/:index", async (req, res) => {
     const userId = req.params.userId;
     const index = req.params.index;
     const researchEntry = await ResearchData.findOne({ userId });
+
+    // Store the item to be deleted for logging
+    const deletedItem = researchEntry.SciArticles[index];
+
     researchEntry.SciArticles.splice(index, 1);
     await researchEntry.save();
+
+    // Log the deletion with the specific item data
+    await logDeleteOperation(userId, researchEntry._id, 'Research.SciArticles', deletedItem);
+
     res.status(200).json({ message: "Article deleted successfully!" });
   } catch (error) {
     console.error("Error while deleting SCI article:", error);
